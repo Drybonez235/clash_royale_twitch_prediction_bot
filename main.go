@@ -1,15 +1,13 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 
-	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
+	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
+	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
 func main(){
-	message1 := twitch.Get_twitch()
-	message2 := clash.Get_clash()
-	fmt.Println(message1)
-	fmt.Println(message2)
+	 twitch.Get_user_info("141981764")
 }
