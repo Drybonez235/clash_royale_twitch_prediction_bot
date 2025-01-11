@@ -102,13 +102,52 @@ func call_user_endpoint(streamer_id string, access_token string, client_id strin
 	return json_response, err
 }
 
-func Get_user_info(streamer_id string){
+func validate_token(AOauth_token string) (string, error){
+	twitch_validation_endpoint := "https://id.twitch.tv/oauth2/validate"
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", twitch_validation_endpoint, nil)
+
+	if err != nil{
+		err = errors.New("There was something wrong with the GET request")
+		return "", err	
+	}
+
+	req.Header.Add("OAuth", AOauth_token)
+
+	resp, err := client.Do(req)
+
+	if err != nil{
+		err = errors.New("There was something wrong with the GET response")
+		return "", err	
+	}
+
+	defer resp.Body.Close()
+
+	//body, err := io.ReadAll(resp.Body)
+
+	if err != nil || resp.Status != "200 OK"{
+		err = errors.New("There was something wrong with the GET body response")
+		return "", err
+	} 
+	return resp.Status, err
+}
+
+func Get_user_info(streamer_id string, client_secret string){
 	client_id := "now6dwkymg4vo236ius5d0sn82v9ul"
-	client_secret := "2k5dw6edjwrx2n9r04ifqq74g4r721"
 
 	OAuth_token, err := request_oath_token(client_id, client_secret)
 	
 	if err != nil{
+		panic(err)
+	}
+
+	valid_token, err := validate_token(OAuth_token)
+
+	if err != nil || valid_token != "200 OK"{
+		err = errors.New("The OAuth token is not valid.")
+		fmt.Println(err)
 		panic(err)
 	}
 

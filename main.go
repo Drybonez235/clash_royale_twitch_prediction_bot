@@ -9,5 +9,6 @@ import (
 )
 
 func main(){
-	 twitch.Get_user_info("oxalate")
+	//PUT CLIENT SECRET IN as second argument
+	 twitch.Get_user_info("oxalate", "")
 }
