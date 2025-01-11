@@ -9,5 +9,5 @@ import (
 )
 
 func main(){
-	 twitch.Get_user_info("141981764")
+	 twitch.Get_user_info("oxalate")
 }
