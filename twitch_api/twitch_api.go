@@ -10,7 +10,7 @@ import (
 	"net/url"
 )
 
-func request_oath_token(client_id string, client_secret string, streamer_name string) (string, error) {
+func request_oath_token(client_id string, client_secret string) (string, error) {
 	twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
 	url_quary := url.Values{}
 		
@@ -23,11 +23,9 @@ func request_oath_token(client_id string, client_secret string, streamer_name st
 
 	req, err := http.NewRequest("POST", twitch_oath_url, strings.NewReader(url_encoded_string))
 
-	fmt.Println(req.URL)
-	fmt.Println(url_encoded_string)
 	if err != nil {
-		fmt.Print(err)
-		return "Hmm", err
+		err = errors.New("There was something wrong with the POST request")
+		return "", err
 	}
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -35,9 +33,8 @@ func request_oath_token(client_id string, client_secret string, streamer_name st
 	resp, err := client.Do(req)
 	
 	if err != nil || resp.Status != "200 OK"{
-		fmt.Print(err)
-		fmt.Println("Err is something... ")	
-		return "Hmm", err
+		err = errors.New("There was something wrong with the POST Response")
+		return "", err
 	}
 
 	defer resp.Body.Close()
@@ -45,36 +42,26 @@ func request_oath_token(client_id string, client_secret string, streamer_name st
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil{
-		fmt.Print(err)
-		return "Hmm", err
+		err = errors.New("There was something wrong with the POST response body")
+		return "", err
 	}
 
 	json_array := make(map[string]any)
 
 	err = json.Unmarshal(body, &json_array)
 
-	if(err != nil){
-		err = errors.New("something went wrong")
-	} 
-
 	if err != nil {
-		fmt.Print(err)
-		return "Hmm", err	
+		err = errors.New("There was something wrong with the json response")
+		return "", err	
 	}
 	access_token_string := json_array["access_token"].(string)
 
-	fmt.Println(access_token_string)
-
-	call_user_endpoint(streamer_name, access_token_string, client_id)
-	return resp.Status, err
+	return access_token_string, err
 }
 
 func call_user_endpoint(streamer_id string, access_token string, client_id string) (string, error) {
 	twitch_get_user_endpoint := "https://api.twitch.tv/helix/users?"
 	bearer_token := "Bearer " + access_token
-
-	fmt.Println(twitch_get_user_endpoint)
-	fmt.Println(bearer_token)
 
 	url_quary := url.Values{}
 	url_quary.Set("login", streamer_id)
@@ -90,15 +77,14 @@ func call_user_endpoint(streamer_id string, access_token string, client_id strin
 	req.Header.Add("Client-Id", client_id)
 
 	if err != nil{
-		fmt.Print(err)
+		err = errors.New("There was something wrong with the GET request")
 		return "", err	
 	}
 
 	resp, err := client.Do(req)
-	fmt.Println(resp.Status)
 	
 	if err != nil || resp.Status != "200 OK"{
-		fmt.Print(err)
+		err = errors.New("There was something wrong with the GET response")
 		return "", err
 	}
 
@@ -106,13 +92,31 @@ func call_user_endpoint(streamer_id string, access_token string, client_id strin
 
 	body, err := io.ReadAll(resp.Body)
 
-	fmt.Println(string(body)) 
+	if err != nil || resp.Status != "200 OK"{
+		err = errors.New("There was something wrong with the GET body response")
+		return "", err
+	}
 
-	return "Do we get here?", err
+	json_response := string(body)
+
+	return json_response, err
 }
 
 func Get_user_info(streamer_id string){
 	client_id := "now6dwkymg4vo236ius5d0sn82v9ul"
 	client_secret := "2k5dw6edjwrx2n9r04ifqq74g4r721"
-	request_oath_token(client_id, client_secret, streamer_id)
+
+	OAuth_token, err := request_oath_token(client_id, client_secret)
+	
+	if err != nil{
+		panic(err)
+	}
+
+	user_data, err := call_user_endpoint(streamer_id, OAuth_token, client_id)
+
+	if err != nil{
+		panic(err)
+	}
+
+	fmt.Println(user_data)
 } 
