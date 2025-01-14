@@ -10,5 +10,6 @@ import (
 
 func main(){
 	//PUT CLIENT SECRET IN as second argument
-	 twitch.Get_user_info("oxalate", "")
+	 //twitch.Get_user_info("oxalate", "")
+	 twitch.Generate_state()
 }
