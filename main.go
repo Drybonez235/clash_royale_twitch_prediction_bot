@@ -11,5 +11,7 @@ import (
 func main(){
 	//PUT CLIENT SECRET IN as second argument
 	 //twitch.Get_user_info("oxalate", "")
-	 twitch.Generate_state()
+	 //twitch.Generate_state()
+	// twitch.Scope_requests("prediction")
+	//twitch.Generate_authorize_app_url("", "prediction")
 }
