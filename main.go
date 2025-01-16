@@ -5,7 +5,8 @@ import (
 
 	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
-	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
 func main(){
@@ -14,4 +15,5 @@ func main(){
 	 //twitch.Generate_state()
 	// twitch.Scope_requests("prediction")
 	//twitch.Generate_authorize_app_url("", "prediction")
+	sqlite.Create_twitch_database()
 }
