@@ -70,13 +70,14 @@ func Check_state(state string) (bool, error){
 		return false ,err
 	}
 
-	defer sql_query.Close()
+//sql_query.Close()
 
 	if sql_query.Step() {
+		sql_query.Close()
 		err = delete_state(state)
 		return true, err
 	} else {
-		delete_state(state)
+		sql_query.Close()
 	}
 
 	return false, err
@@ -92,7 +93,11 @@ func delete_state(state string) error {
 
 	sql_query_string := fmt.Sprintf(`DELETE FROM state WHERE state_value == '%s'`, state)
 
+	fmt.Println(sql_query_string)
+
 	err = db.Exec(sql_query_string)
+
+	//fmt.Println(err.Error())
 
 	if err!=nil{
 		err = errors.New("there was a problem deleting the record")

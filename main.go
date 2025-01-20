@@ -18,12 +18,12 @@ func main(){
 	// twitch.Scope_requests("prediction")
 	//twitch.Generate_authorize_app_url("", "prediction")
 	//sqlite.Create_twitch_database()
-	// err := sqlite.Write_state("Testing State")
+	err := sqlite.Write_state("Testing State")
 
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	panic("Write Panic")
-	// }
+	if err != nil {
+		fmt.Println(err)
+		panic("Write Panic")
+	}
 
 	found, err := sqlite.Check_state("Testing State")
 	if err!= nil{
