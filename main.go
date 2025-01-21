@@ -1,15 +1,13 @@
 package main
 
 import (
-	//"fmt"
-
 	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	"fmt"
 
-	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
-	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
 func main(){
@@ -36,7 +34,10 @@ func main(){
 	// if err != nil{
 	// 	panic("there was a problem with the server")
 	// }
-	test_db()
+	//test_db()
+	//test_twitch_api()
+	test_twitch_api()
+	twitch.Start_server()
 }
 
 func test_db(){
@@ -83,5 +84,12 @@ func test_db(){
 }
 
 func test_twitch_api(){
-	
+	url, err := twitch.Generate_authorize_app_url("now6dwkymg4vo236ius5d0sn82v9ul", "prediction")
+
+	if err != nil{
+		panic(err)
+	}
+
+	fmt.Println(url)
+
 }

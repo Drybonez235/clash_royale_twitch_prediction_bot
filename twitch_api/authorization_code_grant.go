@@ -9,7 +9,7 @@ import (
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
-const uri = "http://localhost:3000"
+//const redirect_uri = "http://localhost:3000"
 
 func Generate_state_nonce(state_nonce string) ( string, error) {
 	randomBytes := make([]byte, 32)
@@ -28,18 +28,14 @@ func Generate_state_nonce(state_nonce string) ( string, error) {
 
 	if state_nonce == "state"{
 		table = "state"
+		err = sqlite.Write_state_nonce(random_string, table)
 	} else if state_nonce == "nonce" {
-		table = "nonce"
+		return random_string, err
 	} else {
 		err = errors.New("invalid table given")
 	}
+
 	if err != nil{
-		return "", err
-	}
-
-	err = sqlite.Write_state_nonce(random_string, table)
-
-	if err!= nil{
 		return "", err
 	}
 
@@ -92,7 +88,7 @@ func Generate_authorize_app_url(client_id string, scope_request string)(string, 
 
 
 	url_quary.Set("state", state)
-
+	
 	nonce, err := Generate_state_nonce("nonce")
 
 	if err != nil{
@@ -101,16 +97,11 @@ func Generate_authorize_app_url(client_id string, scope_request string)(string, 
 
 	url_quary.Set("nonce", nonce)
 
-	if err != nil{
-		return "", err
-	}
 	encoded_url_quary := url_quary.Encode()
 
-	uri_url_quary := "&redirect_uri=" + uri + "&"
+	uri_url_quary := "&redirect_uri=" + redirect_uri + "&"
 
 	return_url := url_authorize + uri_url_quary + encoded_url_quary
-
-	fmt.Println(return_url)
 
 	return return_url, err
 }
