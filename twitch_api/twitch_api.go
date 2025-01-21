@@ -1,18 +1,20 @@
 package twitch_api
 
 import (
-	"strings"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
 const redirect_uri = "http://localhost:3000"
 
-type twitch_user_info struct{
+type Twitch_user_info struct{
 	app_request string
 	app_received string
 	token_exp float64
@@ -72,7 +74,7 @@ func request_oath_token(code string) (error) {
 		return err	
 	}
 
-	var new_user twitch_user_info
+	var new_user Twitch_user_info
 
 	new_user.access_token = json_array["access_token"].(string)
 	new_user.refresh_token = json_array["refresh_token"].(string)
@@ -187,7 +189,7 @@ func validate_token(AOauth_token string) (string, error){
 // 	fmt.Println(user_data)
 // }
 
-func Get_claims(oauth_token string, new_user twitch_user_info) (error){
+func Get_claims(oauth_token string, new_user Twitch_user_info) (error){
 	fmt.Println("Get claims ran")
 
 	twitch_verifiy_user_endpoint := "https://id.twitch.tv/oauth2/userinfo"
@@ -247,5 +249,9 @@ func Get_claims(oauth_token string, new_user twitch_user_info) (error){
 
 	fmt.Println(new_user)
 
+	err = sqlite.Write_twitch_info(new_user.sub, new_user.access_token, new_user.refresh_token, new_user.scope, new_user.token_type,
+	new_user.app_request, new_user.app_received, new_user.token_exp, new_user.token_iat, new_user.token_iss)
+
+	
 	return err
 }

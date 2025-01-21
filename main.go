@@ -10,6 +10,19 @@ import (
 	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
+type Twitch_user_info struct{
+	sub string
+	access_token string
+	refresh_token string
+	scope string
+	token_type string
+	app_request string
+	app_received string
+	token_exp float64
+	token_iat float64
+	token_iss string
+}
+
 func main(){
 	//PUT CLIENT SECRET IN as second argument
 	 //twitch.Get_user_info("oxalate", "")
@@ -34,10 +47,10 @@ func main(){
 	// if err != nil{
 	// 	panic("there was a problem with the server")
 	// }
-	//test_db()
+	test_db()
 	//test_twitch_api()
-	test_twitch_api()
-	twitch.Start_server()
+	//test_twitch_api()
+	//twitch.Start_server()
 }
 
 func test_db(){
@@ -46,40 +59,63 @@ func test_db(){
 	// 	panic(err)
 	// }
 
-	err := sqlite.Write_state_nonce("Testing 1", "state")
+	var tu Twitch_user_info 
+
+	tu.sub = "Drybonez"
+	tu.access_token = "access token"
+	tu.refresh_token = "refresh token"
+	tu.scope = "scope"
+	tu.token_type = "bearer"
+	tu.app_request = "clash_royal_prediction_bot"
+	tu.app_received = "Clash royalk_prediction_bot"
+	tu.token_exp = 50000.0
+	tu.token_iat = 12345.0
+	tu.token_iss = "Twitch"
+
+	err := sqlite.Write_twitch_info(tu.sub, tu.access_token, tu.refresh_token, tu.scope, tu.token_type, tu.app_request, tu.app_received, tu.token_exp, tu.token_iat, tu.token_iss)
 
 	if err != nil{
 		panic(err)
 	}
-	err = sqlite.Write_state_nonce("Testing nonce", "nonce")
+
+	err = sqlite.Get_twitch_user("Drybonez")
+	if err!=nil{
+		panic(err)
+	}
+	// err := sqlite.Write_state_nonce("Testing 1", "state")
+
+	// if err != nil{
+	// 	panic(err)
+	// }
+	// err = sqlite.Write_state_nonce("Testing nonce", "nonce")
 	
-	if err != nil{
-		panic(err)
-	}
+	// if err != nil{
+	// 	panic(err)
+	// }
 
-	here, err := sqlite.Check_state_nonce("Invalid", "state")
+	// here, err := sqlite.Check_state_nonce("Invalid", "state")
 
-	if err != nil{
-		panic(err)
-	}
+	// if err != nil{
+	// 	panic(err)
+	// }
 
-	fmt.Println(here)
+	// fmt.Println(here)
 
-	state_here, err := sqlite.Check_state_nonce("Testing 1", "state")
+	// state_here, err := sqlite.Check_state_nonce("Testing 1", "state")
 
-	if err != nil{
-		panic(err)
-	}
+	// if err != nil{
+	// 	panic(err)
+	// }
 
-	fmt.Println(state_here)
+	// fmt.Println(state_here)
 
-	nonce_here, err := sqlite.Check_state_nonce("Testing nonce", "nonce")
+	// nonce_here, err := sqlite.Check_state_nonce("Testing nonce", "nonce")
 
-	if err != nil{
-		panic(err)
-	}
+	// if err != nil{
+	// 	panic(err)
+	// }
 
-	fmt.Println(nonce_here)
+	// fmt.Println(nonce_here)
 
 }
 
