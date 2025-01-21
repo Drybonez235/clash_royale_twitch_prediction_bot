@@ -24,7 +24,7 @@ func request_oath_token(client_id string, client_secret string) (string, error) 
 	req, err := http.NewRequest("POST", twitch_oath_url, strings.NewReader(url_encoded_string))
 
 	if err != nil {
-		err = errors.New("There was something wrong with the POST request")
+		err = errors.New("there was something wrong with the POST request")
 		return "", err
 	}
 
@@ -33,7 +33,7 @@ func request_oath_token(client_id string, client_secret string) (string, error) 
 	resp, err := client.Do(req)
 	
 	if err != nil || resp.Status != "200 OK"{
-		err = errors.New("There was something wrong with the POST Response")
+		err = errors.New("there was something wrong with the POST Response")
 		return "", err
 	}
 
@@ -42,7 +42,7 @@ func request_oath_token(client_id string, client_secret string) (string, error) 
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil{
-		err = errors.New("There was something wrong with the POST response body")
+		err = errors.New("there was something wrong with the POST response body")
 		return "", err
 	}
 
@@ -51,7 +51,7 @@ func request_oath_token(client_id string, client_secret string) (string, error) 
 	err = json.Unmarshal(body, &json_array)
 
 	if err != nil {
-		err = errors.New("There was something wrong with the json response")
+		err = errors.New("there was something wrong with the json response")
 		return "", err	
 	}
 	access_token_string := json_array["access_token"].(string)
@@ -77,14 +77,14 @@ func call_user_endpoint(streamer_id string, access_token string, client_id strin
 	req.Header.Add("Client-Id", client_id)
 
 	if err != nil{
-		err = errors.New("There was something wrong with the GET request")
+		err = errors.New("there was something wrong with the GET request")
 		return "", err	
 	}
 
 	resp, err := client.Do(req)
 	
 	if err != nil || resp.Status != "200 OK"{
-		err = errors.New("There was something wrong with the GET response")
+		err = errors.New("there was something wrong with the GET response")
 		return "", err
 	}
 
@@ -93,7 +93,7 @@ func call_user_endpoint(streamer_id string, access_token string, client_id strin
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil || resp.Status != "200 OK"{
-		err = errors.New("There was something wrong with the GET body response")
+		err = errors.New("there was something wrong with the GET body response")
 		return "", err
 	}
 
@@ -110,7 +110,7 @@ func validate_token(AOauth_token string) (string, error){
 	req, err := http.NewRequest("GET", twitch_validation_endpoint, nil)
 
 	if err != nil{
-		err = errors.New("There was something wrong with the GET request")
+		err = errors.New("there was something wrong with the GET request")
 		return "", err	
 	}
 
@@ -119,7 +119,7 @@ func validate_token(AOauth_token string) (string, error){
 	resp, err := client.Do(req)
 
 	if err != nil{
-		err = errors.New("There was something wrong with the GET response")
+		err = errors.New("there was something wrong with the GET response")
 		return "", err	
 	}
 
@@ -128,7 +128,7 @@ func validate_token(AOauth_token string) (string, error){
 	//body, err := io.ReadAll(resp.Body)
 
 	if err != nil || resp.Status != "200 OK"{
-		err = errors.New("There was something wrong with the GET body response")
+		err = errors.New("there was something wrong with the GET body response")
 		return "", err
 	} 
 	return resp.Status, err
@@ -146,7 +146,7 @@ func Get_user_info(streamer_id string, client_secret string){
 	valid_token, err := validate_token(OAuth_token)
 
 	if err != nil || valid_token != "200 OK"{
-		err = errors.New("The OAuth token is not valid.")
+		err = errors.New("the oauth token is not valid")
 		fmt.Println(err)
 		panic(err)
 	}

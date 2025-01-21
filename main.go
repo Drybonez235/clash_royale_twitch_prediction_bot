@@ -7,6 +7,7 @@ import (
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	"fmt"
 
+	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
@@ -16,19 +17,71 @@ func main(){
 	 //twitch.Get_user_info("oxalate", "")
 	 //twitch.Generate_state()
 	// twitch.Scope_requests("prediction")
-	//twitch.Generate_authorize_app_url("", "prediction")
-	//sqlite.Create_twitch_database()
-	err := sqlite.Write_state("Testing State")
+	//url, err := twitch.Generate_authorize_app_url("now6dwkymg4vo236ius5d0sn82v9ul", "prediction")
 
-	if err != nil {
-		fmt.Println(err)
-		panic("Write Panic")
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	panic("problem with url generator")
+	// }
+
+	// found, err := sqlite.Check_state("Testing State")
+
+	// if err!= nil{
+	// 	fmt.Println(err)
+	// 	panic("Check Panic")
+	// }
+	//err = twitch.Start_server()
+
+	// if err != nil{
+	// 	panic("there was a problem with the server")
+	// }
+	test_db()
+}
+
+func test_db(){
+	// err := sqlite.Create_twitch_database()
+	// if err != nil{
+	// 	panic(err)
+	// }
+
+	err := sqlite.Write_state_nonce("Testing 1", "state")
+
+	if err != nil{
+		panic(err)
+	}
+	err = sqlite.Write_state_nonce("Testing nonce", "nonce")
+	
+	if err != nil{
+		panic(err)
 	}
 
-	found, err := sqlite.Check_state("Testing State")
-	if err!= nil{
-		fmt.Println(err)
-		panic("Check Panic")
+	here, err := sqlite.Check_state_nonce("Invalid", "state")
+
+	if err != nil{
+		panic(err)
 	}
-	fmt.Print(found)
+
+	fmt.Println(here)
+
+	state_here, err := sqlite.Check_state_nonce("Testing 1", "state")
+
+	if err != nil{
+		panic(err)
+	}
+
+	fmt.Println(state_here)
+
+	nonce_here, err := sqlite.Check_state_nonce("Testing nonce", "nonce")
+
+	if err != nil{
+		panic(err)
+	}
+
+	fmt.Println(nonce_here)
+
+}
+
+func test_twitch_api(){
+	
 }
