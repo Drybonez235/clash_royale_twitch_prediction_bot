@@ -14,6 +14,7 @@ type Authorization_JSON struct {
 }
 
 const client_id = "now6dwkymg4vo236ius5d0sn82v9ul"
+const secret = ""
 
 func Start_server() {
 
@@ -21,23 +22,18 @@ func Start_server() {
 		proccess_authorization_form(req)
 	}
 
-	http.HandleFunc("/", redirect_uri)
+	http.HandleFunc("/redirect", redirect_uri)
 	http.ListenAndServe("localhost:3000", nil)
 }
 
-func proccess_authorization_form(req *http.Request) (Authorization_JSON, error){
+func proccess_authorization_form(req *http.Request) (error){
 	var response Authorization_JSON
-
-	// if req.Response.StatusCode != 200 {
-	// 	err := errors.New("the client denied you access to their account")
-	// 	return Authorization_JSON{}, err
-	// }
 
 	err := req.ParseForm()
 
 	if err != nil{
 		err = errors.New("problem reading form values")
-		return Authorization_JSON{}, err
+		return err
 	}
 
 	response.scope = req.FormValue("scope")
@@ -46,17 +42,19 @@ func proccess_authorization_form(req *http.Request) (Authorization_JSON, error){
 
 	valid, err := sqlite.Check_state_nonce(response.state, "state")
 
-	if !valid {
-		err = errors.New("invalid state. Malicious request")
+	if !valid || err !=nil {
+		err = errors.New("invalid state. Malicious request or the check state didn't work")
+		return err
 	}
 
 	fmt.Println(response)
 
-	err = request_oath_token(response.code)
+	err = Request_user_oath_token(response.code)
 
 	if err!=nil{
+		fmt.Println(err)
 		err = errors.New("there was a propbelm with oauth token request")
 	}
 
-   return response, err
+   return err
 }

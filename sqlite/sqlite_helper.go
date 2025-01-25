@@ -29,7 +29,7 @@ func Create_twitch_database() error {
 	}
 
 	err = db.Exec(`CREATE TABLE twitch_user_info 
-	(sub text, access_token text, refresh_token text, scope text, token_type text, app_request text,
+	(sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
 	app_received text, token_exp float, token_iat float, token_iss text)`)
 
 	if err != nil{
@@ -41,6 +41,8 @@ func Create_twitch_database() error {
 }
 
 func Write_state_nonce(state_nonce string, table string) error {
+
+	fmt.Println("Wrote user to state or nonce")
 	db, err := sqlite3.Open(file)
 
 	if err!=nil{
@@ -78,6 +80,7 @@ func Write_state_nonce(state_nonce string, table string) error {
 }
 
 func Check_state_nonce(state_nonce string, table string) (bool, error){
+	fmt.Println("Checked for state or nonce")
 	db, err := sqlite3.Open(file)
 
 	if err!=nil{
@@ -120,6 +123,8 @@ func Check_state_nonce(state_nonce string, table string) (bool, error){
 }
 
 func delete_state_nonce(state_nonce string, table string) error {
+	fmt.Println("Deleted state or Nonce")
+	
 	db, err := sqlite3.Open(file)
 
 	if err!=nil{
@@ -158,8 +163,10 @@ func delete_state_nonce(state_nonce string, table string) error {
 	return err
 }
 
-func Write_twitch_info(sub string, access_token string, refresh_token string, scope string, token_type string,
-	 app_request string, app_received string, token_exp float64, token_iat float64, token_iss string) error {
+func Write_twitch_info(sub string, display_name string, access_token string, refresh_token string, scope string, token_type string,
+	 app_request string, app_received string, token_exp int, token_iat int, token_iss string) error {
+
+		fmt.Println("Wrote user to Dtabase")
 
 		db, err := sqlite3.Open(file)
 
@@ -170,9 +177,9 @@ func Write_twitch_info(sub string, access_token string, refresh_token string, sc
 
 		//(sub text, access_token text, refresh_token text, scope text, token_type text, app_request text
 			//app_received text, token_exp float, token_iat float, token_iss text)
-		sql_table_values := "'sub', 'access_token', 'refresh_token', 'scope', 'token_type', 'app_request', 'app_received', 'token_exp', 'token_iat', 'token_iss'"
+		sql_table_values := "'sub', 'display_name', 'access_token', 'refresh_token', 'scope', 'token_type', 'app_request', 'app_received', 'token_exp', 'token_iat', 'token_iss'"
 
-		sql_command := fmt.Sprintf("INSERT INTO twitch_user_info (%s) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s')", sql_table_values, sub, access_token, refresh_token, scope, token_type, app_request, app_received, token_exp, token_iat, token_iss)
+		sql_command := fmt.Sprintf("INSERT INTO twitch_user_info (%s) VALUES ('%s', '%s' , '%s', '%s', '%s', '%s', '%s', '%s', %d, %d, '%s')", sql_table_values, sub, display_name, access_token, refresh_token, scope, token_type, app_request, app_received, token_exp, token_iat, token_iss)
 		
 		fmt.Println(sql_command)
 
@@ -186,7 +193,9 @@ func Write_twitch_info(sub string, access_token string, refresh_token string, sc
 		return err
 }
 
-func Get_twitch_user(sub string)error{
+func Get_twitch_user(id_type string, id string)error{
+
+	fmt.Println("Retrieved twitch infor from db")
 	db, err := sqlite3.Open(file)
 
 	if err!=nil{
@@ -194,7 +203,18 @@ func Get_twitch_user(sub string)error{
 		return   err
 	}
 
-	sql_query_string := fmt.Sprintf(`SELECT * FROM twitch_user_info WHERE sub == '%s'`, sub)
+	field := ""
+
+	if id_type == "sub"{
+		field = "sub"
+	} else if id_type == "display_name" {
+		field = "display_name"
+	} else {
+		err = errors.New("invalid id type")
+		return err
+	}
+ 
+	sql_query_string := fmt.Sprintf(`SELECT * FROM twitch_user_info WHERE %s == '%s'`, field, id)
 
 	sql_query, _, err := db.Prepare(sql_query_string)
 
@@ -204,7 +224,8 @@ func Get_twitch_user(sub string)error{
 	}
 
 	for sql_query.Step() {
-		fmt.Println(sql_query.ColumnName(0))
+		fmt.Println(sql_query.ColumnText(0))
+		fmt.Println(sql_query.ColumnText(1))
 	} 
 
 	defer db.Close()

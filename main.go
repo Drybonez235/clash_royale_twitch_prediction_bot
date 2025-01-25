@@ -12,6 +12,7 @@ import (
 
 type Twitch_user_info struct{
 	sub string
+	display_name string
 	access_token string
 	refresh_token string
 	scope string
@@ -23,9 +24,10 @@ type Twitch_user_info struct{
 	token_iss string
 }
 
+const secret = ""
+
 func main(){
-	//PUT CLIENT SECRET IN as second argument
-	 //twitch.Get_user_info("oxalate", "")
+	test_db()
 	 //twitch.Generate_state()
 	// twitch.Scope_requests("prediction")
 	//url, err := twitch.Generate_authorize_app_url("now6dwkymg4vo236ius5d0sn82v9ul", "prediction")
@@ -47,10 +49,10 @@ func main(){
 	// if err != nil{
 	// 	panic("there was a problem with the server")
 	// }
-	test_db()
-	//test_twitch_api()
-	//test_twitch_api()
-	//twitch.Start_server()
+	
+	// test_twitch_api()
+	// twitch.Start_server()
+
 }
 
 func test_db(){
@@ -59,26 +61,28 @@ func test_db(){
 	// 	panic(err)
 	// }
 
-	var tu Twitch_user_info 
+	// var tu Twitch_user_info 
 
-	tu.sub = "Drybonez"
-	tu.access_token = "access token"
-	tu.refresh_token = "refresh token"
-	tu.scope = "scope"
-	tu.token_type = "bearer"
-	tu.app_request = "clash_royal_prediction_bot"
-	tu.app_received = "Clash royalk_prediction_bot"
-	tu.token_exp = 50000.0
-	tu.token_iat = 12345.0
-	tu.token_iss = "Twitch"
+	// tu.sub = "122222"
 
-	err := sqlite.Write_twitch_info(tu.sub, tu.access_token, tu.refresh_token, tu.scope, tu.token_type, tu.app_request, tu.app_received, tu.token_exp, tu.token_iat, tu.token_iss)
+	// tu.access_token = "19385930282"
+	// tu.display_name = "oxalate"
+	// tu.refresh_token = "refresh token"
+	// tu.scope = "scope"
+	// tu.token_type = "bearer"
+	// tu.app_request = "clash_royal_prediction_bot"
+	// tu.app_received = "Clash royalk_prediction_bot"
+	// tu.token_exp = 50000.0
+	// tu.token_iat = 12345.0
+	// tu.token_iss = "Twitch"
 
-	if err != nil{
-		panic(err)
-	}
+	// err := sqlite.Write_twitch_info(tu.sub, tu.display_name, tu.access_token, tu.refresh_token, tu.scope, tu.token_type, tu.app_request, tu.app_received, tu.token_exp, tu.token_iat, tu.token_iss)
 
-	err = sqlite.Get_twitch_user("Drybonez")
+	// if err != nil{
+	// 	panic(err)
+	// }
+
+	err := sqlite.Get_twitch_user("sub","651008027")
 	if err!=nil{
 		panic(err)
 	}
@@ -127,5 +131,12 @@ func test_twitch_api(){
 	}
 
 	fmt.Println(url)
+	//display, err := twitch.Get_display_name("Oxalate")
+
+	// if err != nil{
+	// 	panic(err)
+	// }
+
+	// fmt.Print(display)
 
 }
