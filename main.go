@@ -10,6 +10,9 @@ import (
 	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
+//So at this point I am trying to set up a system that checks to make siure the token is valid. IF it isn't valid, I need to request a new token using a refresh token. Then I am wrtiing
+//To the db the new access token and refresh token. Something somewhere is breaking.
+
 type Twitch_user_info struct{
 	sub string
 	display_name string
@@ -23,33 +26,14 @@ type Twitch_user_info struct{
 	token_iat float64
 	token_iss string
 }
-
-const secret = ""
+//const App_id ="now6dwkymg4vo236ius5d0sn82v9ul"
+//const Secret = ""
 
 func main(){
-	test_db()
-	 //twitch.Generate_state()
-	// twitch.Scope_requests("prediction")
-	//url, err := twitch.Generate_authorize_app_url("now6dwkymg4vo236ius5d0sn82v9ul", "prediction")
-
-
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	panic("problem with url generator")
-	// }
-
-	// found, err := sqlite.Check_state("Testing State")
-
-	// if err!= nil{
-	// 	fmt.Println(err)
-	// 	panic("Check Panic")
-	// }
-	//err = twitch.Start_server()
-
-	// if err != nil{
-	// 	panic("there was a problem with the server")
-	// }
 	
+	
+	test_db()
+
 	// test_twitch_api()
 	// twitch.Start_server()
 
@@ -61,82 +45,54 @@ func test_db(){
 	// 	panic(err)
 	// }
 
-	// var tu Twitch_user_info 
+	user, err := sqlite.Get_twitch_user("sub","651008027")
 
-	// tu.sub = "122222"
-
-	// tu.access_token = "19385930282"
-	// tu.display_name = "oxalate"
-	// tu.refresh_token = "refresh token"
-	// tu.scope = "scope"
-	// tu.token_type = "bearer"
-	// tu.app_request = "clash_royal_prediction_bot"
-	// tu.app_received = "Clash royalk_prediction_bot"
-	// tu.token_exp = 50000.0
-	// tu.token_iat = 12345.0
-	// tu.token_iss = "Twitch"
-
-	// err := sqlite.Write_twitch_info(tu.sub, tu.display_name, tu.access_token, tu.refresh_token, tu.scope, tu.token_type, tu.app_request, tu.app_received, tu.token_exp, tu.token_iat, tu.token_iss)
-
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	err := sqlite.Get_twitch_user("sub","651008027")
 	if err!=nil{
 		panic(err)
 	}
-	// err := sqlite.Write_state_nonce("Testing 1", "state")
+	fmt.Println(user)
 
-	// if err != nil{
-	// 	panic(err)
+	// status, err := twitch.Validate_token("", user.User_id)
+
+	// if err!=nil{
+	// 	fmt.Println(status)
 	// }
-	// err = sqlite.Write_state_nonce("Testing nonce", "nonce")
+
+	// if !status{
+	// 	refreshed, err := twitch.Refresh_token(user.Refresh_token, user.User_id)
+
+	// 	if !refreshed || err !=nil{
+	// 		panic(err)
+	// 	}
+	// 	user, err = sqlite.Get_twitch_user("sub", user.User_id)
+	// 	if !refreshed || err !=nil{
+	// 		panic(err)
+	// 	}
+	// }
 	
-	// if err != nil{
+	status, err := twitch.Validate_token(user.Access_token, user.User_id)
+
+	if err!=nil{
+		fmt.Println(status)
+	}
+
+	// fmt.Println(status)
+
+	// err = twitch.Start_prediction(user.Access_token, user.User_id, user.Display_Name)
+	// if err!=nil{
 	// 	panic(err)
-	// }
+	// }	
 
-	// here, err := sqlite.Check_state_nonce("Invalid", "state")
-
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	// fmt.Println(here)
-
-	// state_here, err := sqlite.Check_state_nonce("Testing 1", "state")
-
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	// fmt.Println(state_here)
-
-	// nonce_here, err := sqlite.Check_state_nonce("Testing nonce", "nonce")
-
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	// fmt.Println(nonce_here)
 
 }
 
 func test_twitch_api(){
-	url, err := twitch.Generate_authorize_app_url("now6dwkymg4vo236ius5d0sn82v9ul", "prediction")
+	url, err := twitch.Generate_authorize_app_url(App_id, "prediction")
 
 	if err != nil{
 		panic(err)
 	}
-
 	fmt.Println(url)
-	//display, err := twitch.Get_display_name("Oxalate")
 
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	// fmt.Print(display)
 
 }

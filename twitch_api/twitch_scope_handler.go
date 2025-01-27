@@ -3,6 +3,7 @@ package twitch_api
 import (
 	"strings"
 	"errors"
+	"fmt"
 )
 
 func Scope_unpacker(scope_array []string) (string, error){
@@ -24,6 +25,25 @@ func Scope_unpacker(scope_array []string) (string, error){
 	return return_scope_string.String(), nil
 }
 
+func Scope_requests(request string) (string, error){
+	var err error 
+
+	request_string := ""
+
+	if request == "prediction"{
+		request_string = "channel:manage:predictions openid" 
+		return request_string, err
+	} else {
+		err = errors.New("invalid scope request")
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(request)
+	return request, err
+}
 // func Scope_packer() (string, error){
 // 	return "", err
 // }

@@ -42,26 +42,6 @@ func Generate_state_nonce(state_nonce string) ( string, error) {
 	return random_string, err
 }
 
-func Scope_requests(request string) (string, error){
-	var err error 
-
-	request_string := ""
-
-	if request == "prediction"{
-		request_string = "channel:manage:predictions openid" 
-		return request_string, err
-	} else {
-		err = errors.New("invalid scope request")
-	}
-
-	if err != nil {
-		return "", err
-	}
-
-	fmt.Println(request)
-	return request, err
-}
-
 func Generate_authorize_app_url(client_id string, scope_request string)(string, error){
 	
 	url_authorize := "https://id.twitch.tv/oauth2/authorize?"

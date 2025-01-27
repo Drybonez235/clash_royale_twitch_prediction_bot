@@ -1,16 +1,21 @@
 package twitch_api
 
 import (
+	//"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
+
+const App_id = "now6dwkymg4vo236ius5d0sn82v9ul"
+const Secret = ""
 
 const redirect_uri = "http://localhost:3000/redirect"
 
@@ -54,6 +59,13 @@ type user_data_json struct {
 	ViewCount        int    `json:"view_count"`
 }
 
+type Refresh_token_response struct{
+	Access_token string `json:"access_token"`
+	Refresh_token string `json:"refresh_token"`
+	Scope []string `json:"scope"`
+	Token_type string `json:"token_type"`
+
+}
 
 func Request_user_oath_token(code string) (error) {
 
@@ -63,8 +75,8 @@ func Request_user_oath_token(code string) (error) {
 
 	url_quary := url.Values{}
 		
-	url_quary.Set("client_id", client_id)
-	url_quary.Set("client_secret", secret)
+	url_quary.Set("client_id", App_id)
+	url_quary.Set("client_secret", Secret)
 	url_quary.Set("grant_type", "authorization_code")
 	url_quary.Set("code", code)
 	url_quary.Set("redirect_uri", redirect_uri)
@@ -219,7 +231,7 @@ func Get_display_name(streamer_id string) (string, error) {
 	
 	req, err := http.NewRequest("GET", get_call, nil)
 	req.Header.Add("Authorization", bearer_token)
-	req.Header.Add("Client-Id", client_id)
+	req.Header.Add("Client-Id", App_id)
 
 	if err != nil{
 		err = errors.New("there was something wrong with the GET request")
@@ -269,8 +281,8 @@ func request_app_oath_token() (string, error) {
 
 	url_quary := url.Values{}
 		
-	url_quary.Set("client_id", client_id)
-	url_quary.Set("client_secret", secret)
+	url_quary.Set("client_id", App_id)
+	url_quary.Set("client_secret", Secret)
 	url_quary.Set("grant_type", "client_credentials")
 	url_encoded_string := url_quary.Encode()
 	
@@ -314,7 +326,7 @@ func request_app_oath_token() (string, error) {
 	return app_oauth_token_json.Access_token, err
 }
 
-func validate_token(AOauth_token string) (string, error){
+func Validate_token(AOauth_token string, sub string) (bool, error){
 	fmt.Println("Validate token ran")
 	twitch_validation_endpoint := "https://id.twitch.tv/oauth2/validate"
 
@@ -324,23 +336,79 @@ func validate_token(AOauth_token string) (string, error){
 
 	if err != nil{
 		err = errors.New("there was something wrong with the GET request")
-		return "", err	
+		return false, err	
 	}
 
-	req.Header.Add("OAuth", AOauth_token)
+	fmt.Println(AOauth_token)
+
+	req.Header.Set("Authorization", "OAuth " + AOauth_token)
 
 	resp, err := client.Do(req)
 
 	if err != nil{
 		err = errors.New("there was something wrong with the GET response")
-		return "", err	
+		return false, err	
 	}
+	body, err := io.ReadAll(resp.Body)
+
+	fmt.Println(string(body))
 
 	defer resp.Body.Close()
 
-	if err != nil || resp.Status != "200 OK"{
-		err = errors.New("there was something wrong with the GET body response")
-		return "", err
-	} 
-	return resp.Status, err
+	if resp.StatusCode != http.StatusOK{
+		err = errors.New("The response status code was not 200")
+		return false, err
+	}
+
+	return true, err
+}
+
+func Refresh_token(refresh_token string, user_id string) (bool, error){
+	refresh_token_url := "https://id.twitch.tv/oauth2/token"
+
+	client := &http.Client{}
+
+	url_quary := url.Values{}
+		
+	url_quary.Set("client_id", App_id)
+	url_quary.Set("client_secret", Secret)
+	url_quary.Set("grant_type", "refresh_token")
+	url_encoded_string := url_quary.Encode()
+
+	req, err := http.NewRequest("POST", refresh_token_url, strings.NewReader(url_encoded_string)) 
+
+	if err!=nil{
+		fmt.Println(err)
+		return false, err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	
+	resp, err := client.Do(req)
+
+	if err!=nil{
+		return false, err
+	}
+
+	json_response, err := io.ReadAll(resp.Body)
+
+	if err!=nil{
+		return false, err
+	}
+
+	var refresh_token_response Refresh_token_response
+
+	err = json.Unmarshal(json_response, &refresh_token_response)
+	// Call the sqlite helper and eit
+
+	if err!=nil{
+		return false, err
+	}
+	fmt.Println(refresh_token_response.Access_token,  refresh_token_response.Refresh_token)
+	err = sqlite.Update_tokens(refresh_token_response.Access_token, refresh_token_response.Refresh_token, user_id)
+
+	if err!=nil{
+		return false, err
+	}
+	return true, nil
 }

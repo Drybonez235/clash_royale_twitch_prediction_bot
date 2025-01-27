@@ -13,9 +13,6 @@ type Authorization_JSON struct {
 	state string
 }
 
-const client_id = "now6dwkymg4vo236ius5d0sn82v9ul"
-const secret = ""
-
 func Start_server() {
 
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
