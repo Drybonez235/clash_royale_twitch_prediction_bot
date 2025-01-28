@@ -3,7 +3,7 @@ package main
 import (
 	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
-	"fmt"
+	//"fmt"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
@@ -26,14 +26,22 @@ type Twitch_user_info struct{
 	token_iat float64
 	token_iss string
 }
-//const App_id ="now6dwkymg4vo236ius5d0sn82v9ul"
-//const Secret = ""
+const App_id ="now6dwkymg4vo236ius5d0sn82v9ul"
+const Secret = ""
 
 func main(){
-	
-	
-	test_db()
 
+	user, err := sqlite.Get_twitch_user("sub","651008027")	
+
+	if err!= nil{
+		panic(err)
+	}
+	
+	err = twitch.Start_prediction(user)
+
+	if err!= nil{
+		panic(err)
+	}
 	// test_twitch_api()
 	// twitch.Start_server()
 
@@ -45,36 +53,31 @@ func test_db(){
 	// 	panic(err)
 	// }
 
-	user, err := sqlite.Get_twitch_user("sub","651008027")
+	// user, err := sqlite.Get_twitch_user("sub","651008027")
 
-	if err!=nil{
-		panic(err)
-	}
-	fmt.Println(user)
+	// if err!=nil{
+	// 	panic(err)
+	// }
+	// fmt.Println(user)
 
-	// status, err := twitch.Validate_token("", user.User_id)
+	// status, err := twitch.Validate_token(user.Access_token, user.User_id)
 
 	// if err!=nil{
 	// 	fmt.Println(status)
 	// }
 
 	// if !status{
-	// 	refreshed, err := twitch.Refresh_token(user.Refresh_token, user.User_id)
+	// refreshed, err := twitch.Refresh_token(user.Refresh_token, user.User_id)
 
 	// 	if !refreshed || err !=nil{
 	// 		panic(err)
 	// 	}
+	// fmt.Println(refreshed)
 	// 	user, err = sqlite.Get_twitch_user("sub", user.User_id)
 	// 	if !refreshed || err !=nil{
 	// 		panic(err)
 	// 	}
 	// }
-	
-	status, err := twitch.Validate_token(user.Access_token, user.User_id)
-
-	if err!=nil{
-		fmt.Println(status)
-	}
 
 	// fmt.Println(status)
 
@@ -87,12 +90,13 @@ func test_db(){
 }
 
 func test_twitch_api(){
-	url, err := twitch.Generate_authorize_app_url(App_id, "prediction")
+	// url, err := twitch.Generate_authorize_app_url(App_id, "prediction")
 
-	if err != nil{
-		panic(err)
-	}
-	fmt.Println(url)
+	// if err != nil{
+	// 	panic(err)
+	// }
+	// fmt.Println(url)
 
+	//twitch.Start_prediction()
 
 }

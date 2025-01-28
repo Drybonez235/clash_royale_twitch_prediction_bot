@@ -1,12 +1,14 @@
 package twitch_api
 
 import (
-	"bytes"
+	//"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
@@ -66,10 +68,6 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 
 	valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id)
 
-	if err!=nil{
-		return err
-	}
-
 	if !valid{
 		//Reresh token refreshes the token and the updates the user
 		fmt.Println(twitch_user.Access_token)
@@ -85,7 +83,7 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 		}
 	}
 
-	prediction_json, err := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
+	prediction_json := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
 
 	if err != nil{
 		fmt.Println("We have the json, now what.")
@@ -96,7 +94,7 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 
 	fmt.Println(prediction_json)
 
-	req, err := http.NewRequest("POST", twitch_prediction_uri, bytes.NewBuffer(prediction_json))
+	req, err := http.NewRequest("POST", twitch_prediction_uri, strings.NewReader(prediction_json))
 
 	if err!=nil{
 		err = errors.New("there was a problem forming the request")
@@ -109,13 +107,15 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 	req.Header.Set("Client-Id", App_id)
 	req.Header.Set("Content-Type", "application/json")
 
-	fmt.Println(req.Body)
+	fmt.Println("Right before sending the req")
+	fmt.Println(bearer)
 	
 
 	resp, err := client.Do(req)
 
 	if err != nil || resp.StatusCode != http.StatusOK{
 		fmt.Println(resp.StatusCode)
+		fmt.Print(io.ReadAll(resp.Body))
 		fmt.Println("There was a problem with the response")
 		return err
 	}
@@ -137,30 +137,28 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 	return err
 }
 
-func prediction_body(sub string, display_name string) ([]byte, error){
+func prediction_body(sub string, display_name string) (string){
 
 
-	fmt.Println("Did we get to start making the prediction body?")
+	prediction_text := fmt.Sprintf(`Will %s win the next game?`, display_name)
 
-	prediction_text := "Will " + display_name + "win the next game?"
+	// body := Prediction_body{
+	// 	Broadcaster_id: sub,
+	// 	Title: prediction_text,
+	// 	Outcomes: []Outcome{
+	// 		{Title: "Yes"},
+	// 		{Title: "No"},
+	// 	},
+	// 	Prediction_window: 60,
+	// }
+	body := fmt.Sprintf(`{"broadcaster_id":"%s","title":"%s","outcomes":[{"title":"Yes"},{"title":"No"}],"prediction_window":60}`,sub, prediction_text)
 
-	body := Prediction_body{
-		Broadcaster_id: sub,
-		Title: prediction_text,
-		Outcomes: []Outcome{
-			{Title: "Yes"},
-			{Title: "No"},
-		},
-		Prediction_window: 60,
-	}
-	fmt.Println("Did we get here?")
+	//jsonData, err := json.Marshal(body)
 
-	jsonData, err := json.Marshal(body)
-
-	if err != nil {
-		fmt.Println("HERE IS THE PROBLEM")
-		err = errors.New("problem with marshaling the data")
-	}
-
-	return jsonData, err
+	// if err != nil {
+	// 	fmt.Println("HERE IS THE PROBLEM")
+	// 	err = errors.New("problem with marshaling the data")
+	// }
+	fmt.Println("Made the prediction body")
+	return body
 }

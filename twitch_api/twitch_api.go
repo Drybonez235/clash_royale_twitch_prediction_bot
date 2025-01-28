@@ -373,6 +373,7 @@ func Refresh_token(refresh_token string, user_id string) (bool, error){
 	url_quary.Set("client_id", App_id)
 	url_quary.Set("client_secret", Secret)
 	url_quary.Set("grant_type", "refresh_token")
+	url_quary.Set("refresh_token", refresh_token)
 	url_encoded_string := url_quary.Encode()
 
 	req, err := http.NewRequest("POST", refresh_token_url, strings.NewReader(url_encoded_string)) 
