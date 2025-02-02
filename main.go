@@ -3,7 +3,7 @@ package main
 import (
 	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
-	//"fmt"
+	"fmt"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
@@ -26,22 +26,24 @@ type Twitch_user_info struct{
 	token_iat float64
 	token_iss string
 }
-const App_id ="now6dwkymg4vo236ius5d0sn82v9ul"
-const Secret = ""
+const App_id ="b2109dc3a41733acaa7b3fa355df4c" //Test app id
+const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
+const user_id = "29277192"
 
 func main(){
+	test_test_twitch_api()
+	//test_db()
+	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 
-	user, err := sqlite.Get_twitch_user("sub","651008027")	
-
-	if err!= nil{
-		panic(err)
-	}
+	// if err!= nil{
+	// 	panic(err)
+	// }
 	
-	err = twitch.Start_prediction(user)
+	// err = twitch.Start_prediction(user)
 
-	if err!= nil{
-		panic(err)
-	}
+	// if err!= nil{
+	// 	panic(err)
+	// }
 	// test_twitch_api()
 	// twitch.Start_server()
 
@@ -85,7 +87,7 @@ func test_db(){
 	// if err!=nil{
 	// 	panic(err)
 	// }	
-
+	//sqlite.Remove_twitch_user(user_id)
 
 }
 
@@ -99,4 +101,29 @@ func test_twitch_api(){
 
 	//twitch.Start_prediction()
 
+}
+
+func test_test_twitch_api(){
+	// err := twitch.Test_request_user_oath_token(user_id)
+	// if err != nil{
+	// 	panic(err)
+	// }
+
+	// err := sqlite.Write_twitch_info(user_id, "Mock API Client","d32157133a9a537","na","channel:manage:predictions openid","bearer",App_id,App_id, 100, 1000, "twitch")
+	
+	// if err!= nil{
+	// 	panic(err)
+	// }
+
+	user, err:= sqlite.Get_twitch_user("sub", user_id)	
+
+	if err!= nil{
+		fmt.Println(err)
+	}
+
+	err = twitch.Start_prediction(user)
+
+	if err!= nil{
+		panic(err)
+	}
 }

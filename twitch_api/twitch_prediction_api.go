@@ -2,20 +2,21 @@ package twitch_api
 
 import (
 	//"bytes"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
-const twitch_prediction_uri = "https://api.twitch.tv/helix/predictions"
+//const twitch_prediction_uri = "https://api.twitch.tv/helix/predictions"
+const twitch_prediction_uri = "http://localhost:8080/mock/predictions"
 
 type Prediction_data_array struct{
-	Data []string `json:"Data"`
+	Data []Prediction_meta_data `json:"data"`
 	//Pagination any `json:"pagination"`
 }
 
@@ -66,35 +67,32 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 
 	//Here we are calling the varify function and passing it all the info it needs. You will need a few if statments if it faisls
 
-	valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id)
+	//valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id)
 
-	if !valid{
-		//Reresh token refreshes the token and the updates the user
-		fmt.Println(twitch_user.Access_token)
-		statusOK, err := Refresh_token(twitch_user.Refresh_token, twitch_user.User_id)
-		if !statusOK {
-			return err
-		}
+	// if !valid{
+	// 	//Reresh token refreshes the token and the updates the user
+	// 	fmt.Println(twitch_user.Access_token)
+	// 	statusOK, err := Refresh_token(twitch_user.Refresh_token, twitch_user.User_id)
+	// 	if !statusOK {
+	// 		return err
+	// 	}
 
-		twitch_user, err = sqlite.Get_twitch_user("sub", twitch_user.User_id)
-		fmt.Println(twitch_user.Access_token)
-		if err!=nil{
-			return err
-		}
-	}
+	// 	twitch_user, err = sqlite.Get_twitch_user("sub", twitch_user.User_id)
+	// 	fmt.Println(twitch_user.Access_token)
+	// 	if err!=nil{
+	// 		return err
+	// 	}
+	// }
 
 	prediction_json := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
 
-	if err != nil{
-		fmt.Println("We have the json, now what.")
-		return err
-	}
+
 
 	client := &http.Client{}
 
-	fmt.Println(prediction_json)
+	fmt.Println(string(prediction_json))
 
-	req, err := http.NewRequest("POST", twitch_prediction_uri, strings.NewReader(prediction_json))
+	req, err := http.NewRequest("POST", twitch_prediction_uri, bytes.NewBuffer(prediction_json))
 
 	if err!=nil{
 		err = errors.New("there was a problem forming the request")
@@ -113,9 +111,9 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 
 	resp, err := client.Do(req)
 
-	if err != nil || resp.StatusCode != http.StatusOK{
+
+	if err != nil{
 		fmt.Println(resp.StatusCode)
-		fmt.Print(io.ReadAll(resp.Body))
 		fmt.Println("There was a problem with the response")
 		return err
 	}
@@ -131,34 +129,31 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 	}
 
 	err = json.Unmarshal(body, &Prediction_data_array)
-
-	fmt.Println(Prediction_data_array)
+	fmt.Println(string(body))
 
 	return err
 }
 
-func prediction_body(sub string, display_name string) (string){
-
+func prediction_body(sub string, display_name string) ([]byte){
 
 	prediction_text := fmt.Sprintf(`Will %s win the next game?`, display_name)
 
-	// body := Prediction_body{
-	// 	Broadcaster_id: sub,
-	// 	Title: prediction_text,
-	// 	Outcomes: []Outcome{
-	// 		{Title: "Yes"},
-	// 		{Title: "No"},
-	// 	},
-	// 	Prediction_window: 60,
-	// }
-	body := fmt.Sprintf(`{"broadcaster_id":"%s","title":"%s","outcomes":[{"title":"Yes"},{"title":"No"}],"prediction_window":60}`,sub, prediction_text)
+	body := Prediction_body{
+		Broadcaster_id: sub,
+		Title: prediction_text,
+		Outcomes: []Outcome{
+			{Title: "Yes"},
+			{Title: "No"},
+		},
+		Prediction_window: 60,
+	}
+	//body := fmt.Sprintf(`{"broadcaster_id":"%s","title":"%s","outcomes":[{"title":"Yes"},{"title":"No"}],"prediction_window":60}`,sub, prediction_text)
 
-	//jsonData, err := json.Marshal(body)
+	jsonData, err := json.Marshal(body)
 
-	// if err != nil {
-	// 	fmt.Println("HERE IS THE PROBLEM")
-	// 	err = errors.New("problem with marshaling the data")
-	// }
+	if err != nil {
+		fmt.Println("JSON Unmarshal Error:", err)
+	}
 	fmt.Println("Made the prediction body")
-	return body
+	return jsonData
 }

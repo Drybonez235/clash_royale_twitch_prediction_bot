@@ -186,7 +186,7 @@ func delete_state_nonce(state_nonce string, table string, db *sqlite3.Conn) erro
 func Write_twitch_info(sub string, display_name string, access_token string, refresh_token string, scope string, token_type string,
 	 app_request string, app_received string, token_exp int, token_iat int, token_iss string) error {
 
-		err := remove_twitch_user(sub)
+		err := Remove_twitch_user(sub)
 
 		if err!=nil{
 			return err
@@ -292,7 +292,7 @@ func Update_tokens(access_token string, refresh_token string, sub string)(error)
 	return nil
 }
 
-func remove_twitch_user(sub string) error {
+func Remove_twitch_user(sub string) error {
 	db, err := open_db()
 
 	if err!=nil{

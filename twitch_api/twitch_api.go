@@ -14,15 +14,15 @@ import (
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
-const App_id = "now6dwkymg4vo236ius5d0sn82v9ul"
-const Secret = ""
+const App_id = "b2109dc3a41733acaa7b3fa355df4c"
+const Secret = "dacb3721ea3023f1e955a053d91f24"//Test secret
 
 const redirect_uri = "http://localhost:3000/redirect"
 
 type access_token_response_json struct {
 	Access_token string `json:"access_token"`
 	Expires_in int `json:"expires_in"`
-	Id_token string `json:"id_token"`
+	//Id_token string `json:"id_token"`
 	Refresh_token string `json:"refresh_token"`
 	Scope []string `json:"scope"`
 	Token_type string `json:"token_type"`
@@ -71,7 +71,9 @@ func Request_user_oath_token(code string) (error) {
 
 	fmt.Println("Request_user_oath_token ran")
 
-	twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
+	//twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
+	//twitch_oath_url := "http://localhost:8080/mock"
+	twitch_oath_url := "http://localhost:8080/auth/authorize"
 
 	url_quary := url.Values{}
 		
@@ -137,7 +139,8 @@ func Get_claims(oauth_token string, new_user access_token_response_json) (error)
 	fmt.Println("Get claims ran")
 	fmt.Println(oauth_token)
 
-	twitch_verifiy_user_endpoint := "https://id.twitch.tv/oauth2/userinfo"
+	//twitch_verifiy_user_endpoint := "https://id.twitch.tv/oauth2/userinfo"
+	twitch_verifiy_user_endpoint := "http://localhost:8080/mock/userinfo"
 
 	bearer_token := "Bearer " + oauth_token
 
@@ -187,11 +190,12 @@ func Get_claims(oauth_token string, new_user access_token_response_json) (error)
 
 	fmt.Println(claims_json.Sub)
 
-	display_name, err := Get_display_name(claims_json.Sub)
+	// display_name, err := Get_display_name(claims_json.Sub)
+	display_name := "Mock API Client"
 
-	if err!=nil{
-		return err
-	}
+	// if err!=nil{
+	// 	return err
+	// }
 
 	unpacked_scope, err := Scope_unpacker(new_user.Scope)
 
@@ -215,7 +219,8 @@ func Get_display_name(streamer_id string) (string, error) {
 		return "", err
 	}
 
-	twitch_get_user_endpoint := "https://api.twitch.tv/helix/users?"
+	//twitch_get_user_endpoint := "https://api.twitch.tv/helix/users?"
+	twitch_get_user_endpoint := "'http://localhost:8080/mock/users"
 	bearer_token := "Bearer " + app_oath_token
 
 	fmt.Println(bearer_token)
@@ -277,7 +282,8 @@ func Get_display_name(streamer_id string) (string, error) {
 func request_app_oath_token() (string, error) {
 	fmt.Println("Request APPPPPPPP _oath_token ran")
 
-	twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
+	//twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
+	twitch_oath_url := "http://localhost:8080/units/clients?"
 
 	url_quary := url.Values{}
 		
@@ -412,4 +418,78 @@ func Refresh_token(refresh_token string, user_id string) (bool, error){
 		return false, err
 	}
 	return true, nil
+}
+
+func Test_request_user_oath_token(user_id string) (error) {
+
+	fmt.Println("TEST Request_user_oath_token ran")
+
+	//twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
+	//twitch_oath_url := "http://localhost:8080/mock"
+	twitch_oath_url := "http://localhost:8080/auth/authorize"
+
+	url_quary := url.Values{}
+		
+	url_quary.Set("client_id", App_id)
+	url_quary.Set("client_secret", Secret)
+	url_quary.Set("grant_type", "user_token")
+	url_quary.Set("user_id", user_id)
+	url_quary.Set("scope", "channel:manage:predictions") //openid") openid
+	//url_quary.Set("redirect_uri", redirect_uri)
+	//url_encoded_string := url_quary.Encode()
+	//url_encoded_string = url_encoded_string + "&scope=channel:manage:predictions"
+	//fmt.Println(url_encoded_string)
+	client := &http.Client{}
+
+	full_url := fmt.Sprintf("%s?%s", twitch_oath_url, url_quary.Encode())
+
+	req, err := http.NewRequest("POST", full_url, nil)
+
+	fmt.Println(req.URL)
+
+	if err != nil {
+		err = errors.New("there was something wrong with the POST request")
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := client.Do(req)
+	
+	if err != nil{
+		fmt.Print(err)
+		err = errors.New("there was something wrong with the POST Response")
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil{
+		err = errors.New("there was something wrong with the POST response body")
+		return err
+	}
+	fmt.Println(string(body))
+
+	var new_user access_token_response_json
+
+	err = json.Unmarshal(body, &new_user)
+
+	if err != nil {
+		err = errors.New("there was something wrong with the json response")
+		return err	
+	}
+
+	fmt.Println(new_user.Access_token)
+
+	//err = Get_claims(new_user.Access_token, new_user)
+
+	fmt.Println("Did we get claims?")
+
+	if err != nil{
+		return err
+	}
+
+	return err
 }
