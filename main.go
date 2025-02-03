@@ -50,10 +50,10 @@ func main(){
 }
 
 func test_db(){
-	// err := sqlite.Create_twitch_database()
-	// if err != nil{
-	// 	panic(err)
-	// }
+	err := sqlite.Create_twitch_database()
+	if err != nil{
+		panic(err)
+	}
 
 	// user, err := sqlite.Get_twitch_user("sub","651008027")
 
@@ -124,6 +124,25 @@ func test_test_twitch_api(){
 	err = twitch.Start_prediction(user)
 
 	if err!= nil{
+		panic(err)
+	}
+
+	prediction_id, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
+
+	if err !=nil{
+		panic(err)
+	}
+
+	outcome, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
+
+	fmt.Println(outcome)
+	if err !=nil{
+		panic(err)
+	}
+
+	err = sqlite.Delete_prediction_id(user.User_id)
+
+	if err !=nil{
 		panic(err)
 	}
 }

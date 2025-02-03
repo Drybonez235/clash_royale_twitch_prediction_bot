@@ -129,7 +129,17 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 	}
 
 	err = json.Unmarshal(body, &Prediction_data_array)
+
+	if err != nil{
+		return err
+	}	
 	fmt.Println(string(body))
+
+	err = Prediction_response_parser(Prediction_data_array)
+
+	if err != nil{
+		return err
+	}
 
 	return err
 }
@@ -156,4 +166,47 @@ func prediction_body(sub string, display_name string) ([]byte){
 	}
 	fmt.Println("Made the prediction body")
 	return jsonData
+}
+
+func Prediction_response_parser(prediction_data_array Prediction_data_array) error{
+
+	data := prediction_data_array.Data
+
+	prediction := data[0]
+
+	prediction_id := prediction.Id
+	streamer_id := prediction.Broadcaster_id
+
+	err := sqlite.Write_new_prediction(streamer_id, prediction_id)
+
+	if err != nil{
+		return err
+	}
+
+	var write_outcomes []map[string]interface{} 
+
+	for i := 0; i < len(prediction.Outcomes); i++{
+		maps := make(map[string]any)
+		outcome := prediction.Outcomes[i]
+		
+		maps["prediction_id"] = prediction_id
+		maps["outcome_id"] = outcome.Outcome_id
+		maps["title"] = outcome.Outcome_title
+
+		if outcome.Outcome_title == "Yes"{
+			maps["lose_win"] = 1
+		} else {
+			maps["lose_win"] = 0	
+		}
+
+		write_outcomes = append(write_outcomes, maps)
+	}
+
+	err = sqlite.Write_new_prediction_outcomes(write_outcomes)
+
+	if err!=nil{
+		return err
+	}
+
+	return nil
 }

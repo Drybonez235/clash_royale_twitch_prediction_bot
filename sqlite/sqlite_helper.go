@@ -50,20 +50,24 @@ func Create_twitch_database() error {
 
 	defer db.Close()
 
-	err = db.Exec(`CREATE TABLE state (state_value text)`)
-	if err != nil{
-		err = errors.New("there was a problem creating the  state table")
-		return err
-	}
+	// err = db.Exec(`CREATE TABLE state (state_value text)`)
+	// if err != nil{
+	// 	err = errors.New("there was a problem creating the  state table")
+	// 	return err
+	// }
 
-	err = db.Exec(`CREATE TABLE twitch_user_info 
-	(sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
-	app_received text, token_exp float, token_iat float, token_iss text)`)
+	// err = db.Exec(`CREATE TABLE twitch_user_info 
+	// (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
+	// app_received text, token_exp float, token_iat float, token_iss text)`)
+
+	err = db.Exec(`CREATE TABLE prediction (broadcaster_id text, prediction_id text, status text)`)
 
 	if err != nil{
 		err = errors.New("there was a problem creating the twitch_user_info table")
 		return err
 	}
+
+	err = db.Exec(`CREATE TABLE outcomes (prediction_id text, outcome_id text, title text, lose_win int)`)
 
 	return err
 }
@@ -308,4 +312,153 @@ func Remove_twitch_user(sub string) error {
 	}
 
 	return nil
+}
+
+func Write_new_prediction(streamer_id string, prediction_id string) error {
+	db, err := open_db()
+
+	if err!= nil{
+		return err
+	}
+
+	sql_query_string := fmt.Sprintf(`INSERT INTO prediction ('broadcaster_id', 'prediction_id', 'status') VALUES('%s','%s','ACTIVE')`,streamer_id, prediction_id)
+
+	err = db.Exec(sql_query_string)
+
+	if err !=nil{
+		return err
+	}
+
+	db.Close()
+
+	return nil
+}
+
+
+//Maybe instead we can make it accept the array of predictions and then just parse from that.
+func Write_new_prediction_outcomes(predictions []map[string]interface{}) error {
+	db, err := open_db()
+
+	for i := 0; i < len(predictions); i++{
+		prediction_data := predictions[i]
+
+		prediction_id := prediction_data["prediction_id"]
+		outcome_id := prediction_data["outcome_id"]
+		title := prediction_data["title"]
+		lose_win := prediction_data["lose_win"]
+
+		sql_query_string := fmt.Sprintf(`INSERT INTO outcomes ('prediction_id', 'outcome_id', 'title', 'lose_win') VALUES('%s', '%s','%s', %d)`,prediction_id, outcome_id, title, lose_win)	
+		
+		db.Exec(sql_query_string)
+
+		if err!=nil{
+			return err
+		}
+	}
+
+	db.Close()
+
+	return err
+}
+
+func Get_predictions(sub string, status string) (string, error) {
+	db, err := open_db()
+
+	if err!=nil{
+		return "", err
+	}
+
+	sql_query_string := fmt.Sprintf(`SELECT * FROM prediction WHERE broadcaster_id == '%s' AND status == '%s'`, sub, status)
+
+	sql_query, _, err := db.Prepare(sql_query_string)
+
+	if err != nil{
+		err = errors.New("there was a problem prepairing the query")
+		return "", err
+	}
+
+	prediction_id := ""
+
+	for sql_query.Step() {
+		prediction_id = sql_query.ColumnText(1)
+	} 
+
+	defer db.Close()
+
+	return prediction_id, err	
+
+}
+
+func Get_prediction_outcome_id(prediction_id string, lose_win int)(string, error){
+	db, err := open_db()
+
+	if err!=nil{
+		return "", err
+	}
+
+	sql_query_string := fmt.Sprintf(`SELECT * FROM outcomes WHERE prediction_id == '%s' AND lose_win == '%d'`, prediction_id, lose_win)
+
+	sql_query, _, err := db.Prepare(sql_query_string)
+
+	if err != nil{
+		err = errors.New("there was a problem prepairing the query")
+		return "", err
+	}
+
+	outcome_id := ""
+
+	for sql_query.Step() {
+		outcome_id = sql_query.ColumnText(1)
+	} 
+
+	defer db.Close()
+
+	return outcome_id, err		
+}
+
+func Delete_prediction_id(sub string)error{
+	db, err := open_db()
+
+	if err!=nil{
+		return err
+	}
+
+	prediction_id, err := Get_predictions(sub, "ACTIVE")
+
+	if err!=nil{
+		return err
+	}
+
+	err = Delete_outcomes(db, prediction_id)
+
+	if err!=nil{
+		return err
+	}
+
+	sql_query_string := fmt.Sprintf(`DELETE FROM prediction WHERE broadcaster_id == '%s'`, prediction_id)
+
+	err = db.Exec(sql_query_string)
+	
+	if err!=nil{
+		return err
+	}
+
+	defer db.Close()
+
+	fmt.Print("Deleted the predictions of id ")
+	fmt.Println(prediction_id)
+	return nil
+}
+
+func Delete_outcomes(db *sqlite3.Conn, prediction_id string) error{
+	sql_query_string := fmt.Sprintf(`DELETE FROM outcomes WHERE prediction_id == '%s'`, prediction_id)
+
+	err := db.Exec(sql_query_string)
+
+	if err!=nil{
+		err = errors.New("there was a problem deleting the outcomes from outcomes")
+		return err
+	}
+
+	return err
 }
