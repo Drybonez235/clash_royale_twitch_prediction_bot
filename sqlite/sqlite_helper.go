@@ -416,6 +416,7 @@ func Get_prediction_outcome_id(prediction_id string, lose_win int)(string, error
 	return outcome_id, err		
 }
 
+//This first deletes the prediction outcomes associated with the prediction, then deletes the prediction id.
 func Delete_prediction_id(sub string)error{
 	db, err := open_db()
 

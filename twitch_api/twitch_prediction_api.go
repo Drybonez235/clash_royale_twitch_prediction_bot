@@ -67,26 +67,21 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 
 	//Here we are calling the varify function and passing it all the info it needs. You will need a few if statments if it faisls
 
-	//valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id)
+	valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id, twitch_user.Refresh_token)
 
-	// if !valid{
-	// 	//Reresh token refreshes the token and the updates the user
-	// 	fmt.Println(twitch_user.Access_token)
-	// 	statusOK, err := Refresh_token(twitch_user.Refresh_token, twitch_user.User_id)
-	// 	if !statusOK {
-	// 		return err
-	// 	}
+	if err!=nil{
+		return err
+	}
 
-	// 	twitch_user, err = sqlite.Get_twitch_user("sub", twitch_user.User_id)
-	// 	fmt.Println(twitch_user.Access_token)
-	// 	if err!=nil{
-	// 		return err
-	// 	}
-	// }
+	if !valid {
+		twitch_user, err  = sqlite.Get_twitch_user("sub", twitch_user.User_id)
+
+		if err != nil{
+			return err
+		}
+	}
 
 	prediction_json := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
-
-
 
 	client := &http.Client{}
 
@@ -166,6 +161,69 @@ func prediction_body(sub string, display_name string) ([]byte){
 	}
 	fmt.Println("Made the prediction body")
 	return jsonData
+}
+
+func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string) error{
+
+	client := &http.Client{}
+
+	requestBody := map[string]interface{}{
+		"broadcaster_id":     broadcaster_id,
+		"id":                 prediction_id,
+		"status":             "RESOLVED",
+		"winning_outcome_id": outcome_id,
+	}
+
+	// Convert map to JSON
+	jsonData, err := json.Marshal(requestBody)
+
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON: %v", err)
+	}
+
+	req, err := http.NewRequest("PATCH", twitch_prediction_uri, bytes.NewBuffer(jsonData))
+
+	if err!=nil{
+		return err
+	}
+
+	bearer_string := "Bearer "+ bearer_token
+	
+	fmt.Println(bearer_string)
+
+	req.Header.Set("Authorization",bearer_string)
+	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+
+	if err!=nil || resp.StatusCode != http.StatusOK{
+		fmt.Println(resp.Status)
+		fmt.Println(resp.Header)
+		return err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err!=nil{
+		return err
+	}
+
+	var json_message map[string]interface{} 
+
+	json.Unmarshal(body, &json_message)
+
+	fmt.Println(string(body))
+
+	fmt.Println("We closed the prediction")
+
+	err = sqlite.Delete_prediction_id(broadcaster_id)
+
+	if err !=nil{
+		return err
+	}
+
+	return nil
 }
 
 func Prediction_response_parser(prediction_data_array Prediction_data_array) error{

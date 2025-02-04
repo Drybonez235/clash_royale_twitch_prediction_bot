@@ -109,11 +109,11 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	// err := sqlite.Write_twitch_info(user_id, "Mock API Client","d32157133a9a537","na","channel:manage:predictions openid","bearer",App_id,App_id, 100, 1000, "twitch")
+	err := sqlite.Write_twitch_info(user_id, "Mock API Client","c09f391acb7a881","na","channel:manage:predictions openid","bearer",App_id,App_id, 100, 1000, "twitch")
 	
-	// if err!= nil{
-	// 	panic(err)
-	// }
+	if err!= nil{
+		panic(err)
+	}
 
 	user, err:= sqlite.Get_twitch_user("sub", user_id)	
 
@@ -121,11 +121,11 @@ func test_test_twitch_api(){
 		fmt.Println(err)
 	}
 
-	err = twitch.Start_prediction(user)
+	// err = twitch.Start_prediction(user)
 
-	if err!= nil{
-		panic(err)
-	}
+	// if err!= nil{
+	// 	panic(err)
+	// }
 
 	prediction_id, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
 
@@ -140,9 +140,18 @@ func test_test_twitch_api(){
 		panic(err)
 	}
 
-	err = sqlite.Delete_prediction_id(user.User_id)
+	// err = sqlite.Delete_prediction_id(user.User_id)
 
-	if err !=nil{
+	// if err !=nil{
+	// 	panic(err)
+	// }
+
+	fmt.Println(outcome)
+
+	err = twitch.End_prediction(prediction_id, outcome, user.User_id, user.Access_token)
+
+	if err!=nil{
 		panic(err)
 	}
+
 }

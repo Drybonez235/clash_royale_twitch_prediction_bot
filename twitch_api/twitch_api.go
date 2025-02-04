@@ -332,7 +332,7 @@ func request_app_oath_token() (string, error) {
 	return app_oauth_token_json.Access_token, err
 }
 
-func Validate_token(AOauth_token string, sub string) (bool, error){
+func Validate_token(AOauth_token string, sub string, refresh_token string) (bool, error){
 	fmt.Println("Validate token ran")
 	twitch_validation_endpoint := "https://id.twitch.tv/oauth2/validate"
 
@@ -362,8 +362,17 @@ func Validate_token(AOauth_token string, sub string) (bool, error){
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK{
-		err = errors.New("The response status code was not 200")
-		return false, err
+		refreshed, err := Refresh_token(refresh_token, sub)
+
+		if err !=nil{
+			return false, err
+		}
+
+		if !refreshed {
+			panic(err)
+		}
+		
+		return false, nil
 	}
 
 	return true, err
@@ -411,7 +420,7 @@ func Refresh_token(refresh_token string, user_id string) (bool, error){
 	if err!=nil{
 		return false, err
 	}
-	fmt.Println(refresh_token_response.Access_token,  refresh_token_response.Refresh_token)
+	fmt.Println(refresh_token_response.Access_token, refresh_token_response.Refresh_token)
 	err = sqlite.Update_tokens(refresh_token_response.Access_token, refresh_token_response.Refresh_token, user_id)
 
 	if err!=nil{
