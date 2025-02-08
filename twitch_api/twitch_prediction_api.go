@@ -67,82 +67,55 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 
 	//Here we are calling the varify function and passing it all the info it needs. You will need a few if statments if it faisls
 
-	valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id, twitch_user.Refresh_token)
+	// valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id, twitch_user.Refresh_token)
 
-	if err!=nil{
-		return err
-	}
+	// if err!=nil{
+	// 	return err
+	// }
 
-	if !valid {
-		twitch_user, err  = sqlite.Get_twitch_user("sub", twitch_user.User_id)
+	// if !valid {
+	// 	twitch_user, err  = sqlite.Get_twitch_user("sub", twitch_user.User_id)
 
-		if err != nil{
-			return err
-		}
-	}
-
+	// 	if err != nil{
+	// 		return err
+	// 	}
+	// }
 	prediction_json := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
-
 	client := &http.Client{}
-
-	fmt.Println(string(prediction_json))
-
 	req, err := http.NewRequest("POST", twitch_prediction_uri, bytes.NewBuffer(prediction_json))
-
 	if err!=nil{
 		err = errors.New("there was a problem forming the request")
 		return err
 	}
-
 	bearer := "Bearer " + twitch_user.Access_token
-
 	req.Header.Set("Authorization", bearer)
 	req.Header.Set("Client-Id", App_id)
 	req.Header.Set("Content-Type", "application/json")
-
-	fmt.Println("Right before sending the req")
-	fmt.Println(bearer)
-	
-
 	resp, err := client.Do(req)
-
-
 	if err != nil{
 		fmt.Println(resp.StatusCode)
 		fmt.Println("There was a problem with the response")
 		return err
 	}
-
 	defer resp.Body.Close()
-
 	var Prediction_data_array Prediction_data_array
-
 	body, err := io.ReadAll(resp.Body)
-
 	if err!=nil{
 		return err
 	}
-
 	err = json.Unmarshal(body, &Prediction_data_array)
-
 	if err != nil{
 		return err
 	}	
-	fmt.Println(string(body))
-
 	err = Prediction_response_parser(Prediction_data_array)
-
 	if err != nil{
 		return err
 	}
-
 	return err
 }
 
 func prediction_body(sub string, display_name string) ([]byte){
-
 	prediction_text := fmt.Sprintf(`Will %s win the next game?`, display_name)
-
 	body := Prediction_body{
 		Broadcaster_id: sub,
 		Title: prediction_text,
@@ -153,9 +126,7 @@ func prediction_body(sub string, display_name string) ([]byte){
 		Prediction_window: 60,
 	}
 	//body := fmt.Sprintf(`{"broadcaster_id":"%s","title":"%s","outcomes":[{"title":"Yes"},{"title":"No"}],"prediction_window":60}`,sub, prediction_text)
-
 	jsonData, err := json.Marshal(body)
-
 	if err != nil {
 		fmt.Println("JSON Unmarshal Error:", err)
 	}
@@ -164,107 +135,71 @@ func prediction_body(sub string, display_name string) ([]byte){
 }
 
 func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string) error{
-
 	client := &http.Client{}
-
 	requestBody := map[string]interface{}{
 		"broadcaster_id":     broadcaster_id,
 		"id":                 prediction_id,
 		"status":             "RESOLVED",
 		"winning_outcome_id": outcome_id,
 	}
-
-	// Convert map to JSON
 	jsonData, err := json.Marshal(requestBody)
-
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON: %v", err)
 	}
-
 	req, err := http.NewRequest("PATCH", twitch_prediction_uri, bytes.NewBuffer(jsonData))
-
 	if err!=nil{
 		return err
 	}
-
 	bearer_string := "Bearer "+ bearer_token
-	
-	fmt.Println(bearer_string)
-
 	req.Header.Set("Authorization",bearer_string)
 	req.Header.Set("Client-Id", App_id)
 	req.Header.Set("Content-Type", "application/json")
-
 	resp, err := client.Do(req)
-
 	if err!=nil || resp.StatusCode != http.StatusOK{
 		fmt.Println(resp.Status)
 		fmt.Println(resp.Header)
 		return err
 	}
-
 	body, err := io.ReadAll(resp.Body)
-
 	if err!=nil{
 		return err
 	}
-
 	var json_message map[string]interface{} 
-
 	json.Unmarshal(body, &json_message)
-
-	fmt.Println(string(body))
-
 	fmt.Println("We closed the prediction")
-
 	err = sqlite.Delete_prediction_id(broadcaster_id)
-
 	if err !=nil{
 		return err
 	}
-
 	return nil
 }
 
 func Prediction_response_parser(prediction_data_array Prediction_data_array) error{
-
 	data := prediction_data_array.Data
-
 	prediction := data[0]
-
 	prediction_id := prediction.Id
 	streamer_id := prediction.Broadcaster_id
-
 	err := sqlite.Write_new_prediction(streamer_id, prediction_id)
-
 	if err != nil{
 		return err
 	}
-
 	var write_outcomes []map[string]interface{} 
-
 	for i := 0; i < len(prediction.Outcomes); i++{
 		maps := make(map[string]any)
 		outcome := prediction.Outcomes[i]
-		
-		maps["prediction_id"] = prediction_id
+				maps["prediction_id"] = prediction_id
 		maps["outcome_id"] = outcome.Outcome_id
 		maps["title"] = outcome.Outcome_title
-
 		if outcome.Outcome_title == "Yes"{
 			maps["lose_win"] = 1
 		} else {
 			maps["lose_win"] = 0	
 		}
-
 		write_outcomes = append(write_outcomes, maps)
 	}
-
 	err = sqlite.Write_new_prediction_outcomes(write_outcomes)
-
 	if err!=nil{
 		return err
 	}
-
 	return nil
 }

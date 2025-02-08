@@ -1,7 +1,7 @@
 package main
 
 import (
-	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
+	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	"fmt"
 
@@ -31,7 +31,9 @@ const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
 const user_id = "29277192"
 
 func main(){
-	test_test_twitch_api()
+	Test_clash_api()
+	//test_test_twitch_api()
+	//test_test_twitch_api()
 	//test_db()
 	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 
@@ -109,23 +111,23 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	err := sqlite.Write_twitch_info(user_id, "Mock API Client","c09f391acb7a881","na","channel:manage:predictions openid","bearer",App_id,App_id, 100, 1000, "twitch")
-	
-	if err!= nil{
+	err := sqlite.Write_twitch_info(user_id, "Name", "933e809de20977a", "", "not important", "bear", "","",0,0,"")
+
+	if err!=nil{
 		panic(err)
 	}
 
-	user, err:= sqlite.Get_twitch_user("sub", user_id)	
+	user, err := sqlite.Get_twitch_user("sub", user_id)	
 
 	if err!= nil{
 		fmt.Println(err)
 	}
 
-	// err = twitch.Start_prediction(user)
+	err = twitch.Start_prediction(user)
 
-	// if err!= nil{
-	// 	panic(err)
-	// }
+	if err!= nil{
+		panic(err)
+	}
 
 	prediction_id, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
 
@@ -135,16 +137,9 @@ func test_test_twitch_api(){
 
 	outcome, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
 
-	fmt.Println(outcome)
 	if err !=nil{
 		panic(err)
 	}
-
-	// err = sqlite.Delete_prediction_id(user.User_id)
-
-	// if err !=nil{
-	// 	panic(err)
-	// }
 
 	fmt.Println(outcome)
 
@@ -154,4 +149,20 @@ func test_test_twitch_api(){
 		panic(err)
 	}
 
+}
+
+func Test_clash_api(){
+	player_tag := "2YJRUQ2Q"
+	battles, err := clash.Get_prior_battles(player_tag)
+
+	if err!=nil{
+		panic(err)
+	}
+	// fmt.Println(battles.Matches[0].Team)
+
+	battle_0 := battles.Matches[0]
+	
+	time, err := clash.String_time_to_time_time(battle_0)
+
+	fmt.Print(time)
 }

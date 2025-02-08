@@ -3,7 +3,7 @@ package twitch_api
 import (
 	"strings"
 	"errors"
-	"fmt"
+	//"fmt"
 )
 
 func Scope_unpacker(scope_array []string) (string, error){
@@ -40,8 +40,6 @@ func Scope_requests(request string) (string, error){
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Println(request)
 	return request, err
 }
 // func Scope_packer() (string, error){
