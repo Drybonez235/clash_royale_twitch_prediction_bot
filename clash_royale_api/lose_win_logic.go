@@ -1,15 +1,15 @@
 package clash_royale_api
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
-func New_battle(player_tag string, prediction_created_at time.Time)error{
+func New_battle(player_tag string, prediction_created_at time.Time)(string, error){
 	Matches, err := Get_prior_battles(player_tag)
 
 	if err!=nil{
-		return err
+		return "error",err
 	}
 
 	for i:=0; i < len(Matches.Matches); i++{
@@ -17,21 +17,20 @@ func New_battle(player_tag string, prediction_created_at time.Time)error{
 		Battle_time, err := String_time_to_time_time(Match.BattleTime)
 
 		if err!=nil{
-			return err
+			return "", err
 		}
 
 		if Battle_time.After(prediction_created_at){
-			//Check for win or lose
-			//End prediction
+			lose_win := Lose_win(Match)
+
+			return lose_win, nil
 		} else{
-			break
+			return "no_new_battles", nil
 		}
 	}
 
-
-	fmt.Println(Matches)
-	//We are going to have to mess with time 
-	return nil
+	fmt.Println(Matches.Matches[0])
+	return "err", nil
 }
 
 func String_time_to_time_time(battle_time_string string)(time.Time, error){
@@ -54,4 +53,21 @@ func String_time_to_time_time(battle_time_string string)(time.Time, error){
 	}
 
 	return t, nil
+}
+
+func Lose_win(match Match)(string){
+	streamer_player := match.Team[0]
+	opponent_player := match.Opponent[0]
+
+	streamer_player_crowns := streamer_player.Crowns
+	opponent_player_crowns := opponent_player.Crowns
+
+
+	if streamer_player_crowns > opponent_player_crowns{
+		return "win"
+	} else if opponent_player_crowns > streamer_player_crowns{
+		return "lose"
+	} else {
+		return "tie"
+	}
 }

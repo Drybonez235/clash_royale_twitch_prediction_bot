@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	"fmt"
@@ -31,8 +33,8 @@ const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
 const user_id = "29277192"
 
 func main(){
-	//Test_clash_api()
-	test_test_twitch_api()
+	Test_clash_api()
+	//test_test_twitch_api()
 	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 
 	// if err!= nil{
@@ -158,9 +160,24 @@ func Test_clash_api(){
 	}
 	// fmt.Println(battles.Matches[0].Team)
 
-	battle_0 := battles.Matches[0].BattleTime
-	
-	time, err := clash.String_time_to_time_time(battle_0)
+	past_time, err :=  time.Parse(time.RFC3339, "2025-02-09T05:27:50Z")
 
-	fmt.Print(time)
+	if err!=nil{
+		panic(err)
+	}
+
+	battle_0 := battles.Matches[0]
+
+	result, err := clash.New_battle(player_tag, past_time)
+	if err!=nil{
+		panic(err)
+	}
+	time, err := clash.String_time_to_time_time(battle_0.BattleTime)
+
+	if err!=nil{
+		panic(err)
+	}
+
+	fmt.Println(time)
+	fmt.Println(result)
 }
