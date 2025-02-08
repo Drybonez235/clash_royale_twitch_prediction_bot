@@ -179,7 +179,9 @@ func Prediction_response_parser(prediction_data_array Prediction_data_array) err
 	prediction := data[0]
 	prediction_id := prediction.Id
 	streamer_id := prediction.Broadcaster_id
-	err := sqlite.Write_new_prediction(streamer_id, prediction_id)
+	created_at := prediction.Created_at
+	created_at = created_at[0:18]+"Z"
+	err := sqlite.Write_new_prediction(streamer_id, prediction_id, created_at)
 	if err != nil{
 		return err
 	}

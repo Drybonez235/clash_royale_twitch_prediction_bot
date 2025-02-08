@@ -31,10 +31,8 @@ const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
 const user_id = "29277192"
 
 func main(){
-	Test_clash_api()
-	//test_test_twitch_api()
-	//test_test_twitch_api()
-	//test_db()
+	//Test_clash_api()
+	test_test_twitch_api()
 	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 
 	// if err!= nil{
@@ -52,17 +50,17 @@ func main(){
 }
 
 func test_db(){
-	err := sqlite.Create_twitch_database()
-	if err != nil{
-		panic(err)
-	}
-
-	// user, err := sqlite.Get_twitch_user("sub","651008027")
-
-	// if err!=nil{
+	// err := sqlite.Create_twitch_database()
+	// if err != nil{
 	// 	panic(err)
 	// }
-	// fmt.Println(user)
+
+	user, err := sqlite.Get_twitch_user("sub","651008027")
+
+	if err!=nil{
+		panic(err)
+	}
+	fmt.Println(user)
 
 	// status, err := twitch.Validate_token(user.Access_token, user.User_id)
 
@@ -89,7 +87,7 @@ func test_db(){
 	// if err!=nil{
 	// 	panic(err)
 	// }	
-	//sqlite.Remove_twitch_user(user_id)
+	// sqlite.Remove_twitch_user(user_id)
 
 }
 
@@ -111,11 +109,11 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	err := sqlite.Write_twitch_info(user_id, "Name", "933e809de20977a", "", "not important", "bear", "","",0,0,"")
+	// err := sqlite.Write_twitch_info(user_id, "Name", "13e35cf9690bc85", "", "not important", "bear", "","",0,0,"")
 
-	if err!=nil{
-		panic(err)
-	}
+	// if err!=nil{
+	// 	panic(err)
+	// }
 
 	user, err := sqlite.Get_twitch_user("sub", user_id)	
 
@@ -160,7 +158,7 @@ func Test_clash_api(){
 	}
 	// fmt.Println(battles.Matches[0].Team)
 
-	battle_0 := battles.Matches[0]
+	battle_0 := battles.Matches[0].BattleTime
 	
 	time, err := clash.String_time_to_time_time(battle_0)
 

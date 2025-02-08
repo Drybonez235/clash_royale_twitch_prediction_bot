@@ -1,9 +1,11 @@
 package clash_royale_api
 
-import ("time"
-	"fmt")
+import (
+	"time"
+	"fmt"
+)
 
-func New_battle(player_tag string, last_prediction_time_end time.Time)error{
+func New_battle(player_tag string, prediction_created_at time.Time)error{
 	Matches, err := Get_prior_battles(player_tag)
 
 	if err!=nil{
@@ -18,7 +20,7 @@ func New_battle(player_tag string, last_prediction_time_end time.Time)error{
 			return err
 		}
 
-		if Battle_time.After(last_prediction_time_end){
+		if Battle_time.After(prediction_created_at){
 			//Check for win or lose
 			//End prediction
 		} else{
@@ -26,7 +28,7 @@ func New_battle(player_tag string, last_prediction_time_end time.Time)error{
 		}
 	}
 
-	
+
 	fmt.Println(Matches)
 	//We are going to have to mess with time 
 	return nil

@@ -45,17 +45,19 @@ func Create_twitch_database() error {
 
 	defer db.Close()
 
-	// err = db.Exec(`CREATE TABLE state (state_value text)`)
-	// if err != nil{
-	// 	err = errors.New("there was a problem creating the  state table")
-	// 	return err
-	// }
+	err = db.Exec(`CREATE TABLE state (state_value text)`)
+	if err != nil{
+		err = errors.New("there was a problem creating the  state table")
+		return err
+	}
 
-	// err = db.Exec(`CREATE TABLE twitch_user_info 
-	// (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
-	// app_received text, token_exp float, token_iat float, token_iss text)`)
+	err = db.Exec(`CREATE TABLE twitch_user_info (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
+	app_received text, token_exp float, token_iat float, token_iss text)`)
 
-	err = db.Exec(`CREATE TABLE prediction (broadcaster_id text, prediction_id text, status text)`)
+	if err!=nil{
+		return err
+	}
+	err = db.Exec(`CREATE TABLE prediction (broadcaster_id text, prediction_id text, status text, created_at text)`)
 
 	if err != nil{
 		err = errors.New("there was a problem creating the twitch_user_info table")
@@ -243,16 +245,17 @@ func Remove_twitch_user(sub string) error {
 	return nil
 }
 
-func Write_new_prediction(streamer_id string, prediction_id string) error {
+func Write_new_prediction(streamer_id string, prediction_id string, created_at string) error {
 	db, err := open_db()
 	if err!= nil{
 		return err
 	}
-	sql_query_string := fmt.Sprintf(`INSERT INTO prediction ('broadcaster_id', 'prediction_id', 'status') VALUES('%s','%s','ACTIVE')`,streamer_id, prediction_id)
+	sql_query_string := fmt.Sprintf(`INSERT INTO prediction ('broadcaster_id', 'prediction_id', 'status', 'created_at') VALUES('%s','%s','ACTIVE', '%s')`,streamer_id, prediction_id, created_at)
 	err = db.Exec(sql_query_string)
 	if err !=nil{
 		return err
 	}
+	fmt.Println(sql_query_string)
 	db.Close()
 	return nil
 }
