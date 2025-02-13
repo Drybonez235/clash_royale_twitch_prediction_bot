@@ -6,6 +6,7 @@ import (
 )
 
 func New_battle(player_tag string, prediction_created_at time.Time)(string, error){
+	fmt.Println("New Battle Fired")
 	Matches, err := Get_prior_battles(player_tag)
 
 	if err!=nil{
@@ -34,7 +35,7 @@ func New_battle(player_tag string, prediction_created_at time.Time)(string, erro
 }
 
 func String_time_to_time_time(battle_time_string string)(time.Time, error){
-
+	fmt.Println("String time to time time fired")
 	battle_time_string_year := battle_time_string[0:4]
 	battle_time_string_month := battle_time_string[4:6]
 	battle_time_string_day := battle_time_string[6:8]
@@ -56,12 +57,12 @@ func String_time_to_time_time(battle_time_string string)(time.Time, error){
 }
 
 func Lose_win(match Match)(string){
+	fmt.Println("Lose_win fired")
 	streamer_player := match.Team[0]
 	opponent_player := match.Opponent[0]
 
 	streamer_player_crowns := streamer_player.Crowns
 	opponent_player_crowns := opponent_player.Crowns
-
 
 	if streamer_player_crowns > opponent_player_crowns{
 		return "win"

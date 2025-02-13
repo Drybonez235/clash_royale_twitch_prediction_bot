@@ -280,23 +280,26 @@ func Write_new_prediction_outcomes(predictions []map[string]interface{}) error {
 	return err
 }
 
-func Get_predictions(sub string, status string) (string, error) {
+func Get_predictions(sub string, status string) (string,string, error) {
 	db, err := open_db()
 	if err!=nil{
-		return "", err
+		return "","", err
 	}
 	sql_query_string := fmt.Sprintf(`SELECT * FROM prediction WHERE broadcaster_id == '%s' AND status == '%s'`, sub, status)
 	sql_query, _, err := db.Prepare(sql_query_string)
 	if err != nil{
 		err = errors.New("there was a problem prepairing the query")
-		return "", err
+		return "", "" ,err
 	}
 	prediction_id := ""
+	created_at := ""
 	for sql_query.Step() {
 		prediction_id = sql_query.ColumnText(1)
-	} 
+		created_at = sql_query.ColumnText(3)
+	}
+
 	defer db.Close()
-	return prediction_id, err	
+	return prediction_id, created_at, nil	
 }
 
 func Get_prediction_outcome_id(prediction_id string, lose_win int)(string, error){
@@ -315,7 +318,8 @@ func Get_prediction_outcome_id(prediction_id string, lose_win int)(string, error
 		outcome_id = sql_query.ColumnText(1)
 	} 
 	defer db.Close()
-	return outcome_id, err		
+
+	return outcome_id, nil		
 }
 
 //This first deletes the prediction outcomes associated with the prediction, then deletes the prediction id.
@@ -324,7 +328,7 @@ func Delete_prediction_id(sub string)error{
 	if err!=nil{
 		return err
 	}
-	prediction_id, err := Get_predictions(sub, "ACTIVE")
+	prediction_id, _, err := Get_predictions(sub, "ACTIVE")
 	if err!=nil{
 		return err
 	}
@@ -350,3 +354,17 @@ func Delete_outcomes(db *sqlite3.Conn, prediction_id string) error{
 	}
 	return err
 }
+func Delete_all_predictions(sub string) error{
+	db, err := open_db()
+	if err!=nil{
+		return err
+	}
+	sql_query_string := fmt.Sprintf(`DELETE FROM prediction WHERE broadcaster_id == '%s'`, sub)
+	err = db.Exec(sql_query_string)
+	if err!=nil{
+		err = errors.New("there was a problem deleting the outcomes from outcomes")
+		return err
+	}
+	return err
+}
+

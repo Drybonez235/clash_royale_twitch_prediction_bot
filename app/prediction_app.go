@@ -1,0 +1,132 @@
+package app
+
+import (
+	"fmt"
+	"time"
+
+	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
+	sqlite "github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+)
+
+func Start_prediction_app(sub string) error {
+	user, err := sqlite.Get_twitch_user("sub", sub)
+
+	if err!=nil{
+		panic(err)
+	}
+
+	stream := true //, err := twitch.Check_stream_status(sub)
+
+	// if err!=nil{
+	// 	return err
+	// }
+
+
+	for stream {
+		//We have to check to see if there is an active prediction here that was set by me. IF it was not set by me, then we need to wait.
+
+	prediction_id, _,err := sqlite.Get_predictions(user.User_id, "ACTIVE")
+
+	if err!=nil{
+		return err
+	}
+		own_active_prediction, err := twitch.Check_prediction(sub, user.Access_token, prediction_id)
+		fmt.Println(own_active_prediction)
+		if err!= nil{
+			return err
+		}
+
+		 if own_active_prediction == "our_prediction" {
+			fmt.Println("Our prediction")
+			err = Watch_prediction(sub, user)
+
+			if err!=nil{
+				return err
+			}
+
+		 }else if own_active_prediction == "no_active_prediction"{
+			fmt.Println("prediction started")
+			err = twitch.Start_prediction(user)
+
+			if err!=nil{
+				panic(err)
+			}
+		} else if own_active_prediction == "not_our_prediction" {
+			fmt.Println("Not our prediction")
+			time.Sleep(30 * time.Second)
+		} 
+
+		if err!=nil{
+			return err
+		}
+	}
+	return nil
+}
+
+//IF we own the prediction then this function will fire.
+func Watch_prediction(sub string, user sqlite.Twitch_user)error{
+
+	prediction_id, created_at ,err := sqlite.Get_predictions(sub, "ACTIVE")
+
+	if err!=nil{
+		return err
+	}
+
+	if prediction_id == ""{
+		return err
+	}
+
+	t_created_at, err := time.Parse(time.RFC3339, created_at)
+
+	if err!=nil{
+		panic(err)
+	}
+
+	new_battle := "no_new_battles"
+
+	for new_battle == "no_new_battles"{
+
+		new_battle, err := clash.New_battle("2VL9VP8Y0", t_created_at)
+
+		if err!=nil{
+			return err
+		}
+
+		if new_battle == "no_new_battles"{
+			fmt.Println("no new battles")
+			time.Sleep(30 * time.Second)
+		} else if new_battle == "win"{
+			fmt.Println("Battle win")	
+			outcome_id, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
+			if err!=nil{
+				return err
+			}
+			if outcome_id == ""{
+				fmt.Println("Outcome id was blanck")
+			}
+			err = twitch.End_prediction(prediction_id, outcome_id, user.User_id, user.Access_token)
+			if err !=nil{
+				return err
+			}
+			return nil
+		} else if new_battle == "lose"{
+			outcome_id, err := sqlite.Get_prediction_outcome_id(prediction_id, 0)
+			fmt.Println("Battle lose")	
+			if err!=nil{
+				return err
+			}
+			if outcome_id == ""{
+				fmt.Println("Outcome id was blanck")
+			}
+			err = twitch.End_prediction(prediction_id, outcome_id, user.User_id, user.Access_token)
+			if err !=nil{
+				return err
+			}
+		return nil
+	} else if new_battle == "tie"{
+		fmt.Println("Battle tie")
+	}
+}
+	return nil
+}

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	//"strings"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
@@ -134,7 +136,85 @@ func prediction_body(sub string, display_name string) ([]byte){
 	return jsonData
 }
 
+//THis is a new untested function... Need to make sure it works. It is called to see if we need to make a new prediction OR wait.
+func Check_prediction(sub string, bearer string, prediction_id string)(string, error){
+	client := &http.Client{}
+
+	url_quary := url.Values{}
+	url_quary.Set("broadcaster_id", sub)
+	url_quary.Set("first", "0")
+
+	if prediction_id != ""{
+		url_quary.Set("id", prediction_id)
+	}
+	url_encoded_string := url_quary.Encode()
+
+	check_prediction_url := twitch_prediction_uri +"?"+url_encoded_string
+
+	req, err := http.NewRequest("GET", check_prediction_url, nil)// twitch_prediction_uri ,strings.NewReader(url_encoded_string))
+
+	if err!=nil{
+		return "", err
+	}
+
+	bearer_string := "Bearer "+ bearer
+
+	req.Header.Set("Authorization", bearer_string)
+	req.Header.Set("Client-Id", App_id)
+
+	resp, err := client.Do(req)
+
+	if err!=nil || resp.StatusCode != http.StatusOK{
+		fmt.Println(resp.Status)
+		return "", err
+	}	
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err!=nil{
+		return "", err
+	}
+
+	var prediction_body Prediction_data_array
+
+	err = json.Unmarshal(body, &prediction_body)
+
+	if err!=nil{
+		return "", err
+	}
+	fmt.Println(prediction_body.Data[0])
+
+	if prediction_body.Data[0].Status == "ACTIVE" || prediction_body.Data[0].Status == "LOCKED"{
+		current_prediction, _, err := sqlite.Get_predictions(sub, "ACTIVE")
+
+		fmt.Println(current_prediction)
+		fmt.Println(prediction_body.Data[0].Id)
+
+		if err!=nil{
+			return "", err
+		}
+
+		if current_prediction == ""{
+			return "not_our_prediction", nil
+		}
+
+		if prediction_body.Data[0].Id == current_prediction{
+				return "our_prediction", nil
+			} else {
+				return "not_our_prediction", nil
+			}
+	} else {
+		return "no_active_prediction", nil 
+	}
+}
+
 func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string) error{
+
+	if prediction_id == "" || outcome_id == ""{
+		err := errors.New("prediction or outcome id was blank")
+		return err
+	}
+
 	client := &http.Client{}
 	requestBody := map[string]interface{}{
 		"broadcaster_id":     broadcaster_id,
@@ -156,6 +236,7 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err!=nil || resp.StatusCode != http.StatusOK{
+		fmt.Println("This is causing the problem")
 		fmt.Println(resp.Status)
 		fmt.Println(resp.Header)
 		return err
@@ -180,7 +261,7 @@ func Prediction_response_parser(prediction_data_array Prediction_data_array) err
 	prediction_id := prediction.Id
 	streamer_id := prediction.Broadcaster_id
 	created_at := prediction.Created_at
-	created_at = created_at[0:18]+"Z"
+	created_at = created_at[0:19]+"Z"
 	err := sqlite.Write_new_prediction(streamer_id, prediction_id, created_at)
 	if err != nil{
 		return err

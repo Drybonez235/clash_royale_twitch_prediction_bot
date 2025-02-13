@@ -347,3 +347,8 @@ func Test_request_user_oath_token(user_id string) (error) {
 	}
 	return err
 }
+
+func Check_stream_status(sub string) (bool, error){
+	//Code that checks to see if the streamer is still streaming.
+	return true, nil
+}
