@@ -6,13 +6,14 @@ import (
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	_ "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
 
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	"fmt"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
-	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
 //So at this point I am trying to set up a system that checks to make siure the token is valid. IF it isn't valid, I need to request a new token using a refresh token. Then I am wrtiing
@@ -23,8 +24,10 @@ const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
 const user_id = "29277192"
 
 func main(){
+ 	server.Start_server()
+	//test_event_sub()
 	//Test_clash_api()
-	test_app()
+	//test_app()
 	//test_test_twitch_api()
 	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 
@@ -102,17 +105,17 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	// err = sqlite.Write_twitch_info(user_id, "Name", "f441f05263c721d", "", "not important", "bearer", "","",0,0,"")
+	// err := sqlite.Write_twitch_info(user_id, "Name", "1a8056d6b5e1ee9", "", "not important", "bearer", "","",0,0,"")
 
 	// if err!=nil{
 	// 	panic(err)
 	// }
 
-	user, err := sqlite.Get_twitch_user("sub", user_id)	
+	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 
-	if err!= nil{
-		fmt.Println(err)
-	}
+	// if err!= nil{
+	// 	fmt.Println(err)
+	// }
 
 	// err = twitch.Start_prediction(user)
 
@@ -120,33 +123,33 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	prediction_id, _, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
+	// prediction_id, _, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
 
-	if err !=nil{
-		fmt.Println(err)
-	}
+	// if err !=nil{
+	// 	fmt.Println(err)
+	// }
 
-	status, err := twitch.Check_prediction(user.User_id, user.Access_token, prediction_id)
+	// status, err := twitch.Check_prediction(user.User_id, user.Access_token, prediction_id)
 
-	if err!= nil{
-			panic(err)
-	}
+	// if err!= nil{
+	// 		panic(err)
+	// }
 
-	fmt.Println(status)
+	// fmt.Println(status)
 
-	outcome, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
+	// outcome, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
 
-	if err !=nil{
-		panic(err)
-	}
+	// if err !=nil{
+	// 	panic(err)
+	// }
 
-	fmt.Println(outcome)
+	// fmt.Println(outcome)
 
-	err = twitch.End_prediction(prediction_id, outcome, user.User_id, user.Access_token)
+	// err = twitch.End_prediction(prediction_id, outcome, user.User_id, user.Access_token)
 
-	if err!=nil{
-		panic(err)
-	}
+	// if err!=nil{
+	// 	panic(err)
+	// }
 
 }
 
@@ -193,4 +196,24 @@ func test_app(){
 	if err!=nil{
 		panic(err)
 	}
+}
+
+
+
+func test_event_sub(){
+	user, err := sqlite.Get_twitch_user("sub", user_id)	
+
+	if err!= nil{
+		fmt.Println(err)
+	}
+
+	err = server.Create_EventSub(user, "streamup")
+
+	if err!=nil{
+		fmt.Println(err)
+		panic(err)
+	}
+
+
+
 }
