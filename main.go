@@ -1,19 +1,12 @@
 package main
 
 import (
-	"time"
-
-	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
-	_ "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
+	"fmt"
+	//app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
-
-	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
-	"fmt"
-
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
-	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
-	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
 //So at this point I am trying to set up a system that checks to make siure the token is valid. IF it isn't valid, I need to request a new token using a refresh token. Then I am wrtiing
@@ -24,25 +17,20 @@ const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
 const user_id = "29277192"
 
 func main(){
- 	server.Start_server()
+	// var1, err := twitch.Get_display_name("29277192")
+
+	// if err!=nil{panic(err)}
+	// fmt.Println(var1)
+
+	var2, err := clash.String_time_to_time_time("20240101T0202002Z")
+	if err!=nil{panic(err)}
+	fmt.Println(var2)
+
+
+ 	//server.Start_server()
 	//test_event_sub()
-	//Test_clash_api()
 	//test_app()
-	//test_test_twitch_api()
-	// user, err := sqlite.Get_twitch_user("sub", user_id)	
-
-	// if err!= nil{
-	// 	panic(err)
-	// }
-	
-	// err = twitch.Start_prediction(user)
-
-	// if err!= nil{
-	// 	panic(err)
-	// }
-	// test_twitch_api()
-	// twitch.Start_server()
-
+	test_test_twitch_api()
 }
 
 func test_db(){
@@ -100,105 +88,43 @@ func test_twitch_api(){
 }
 
 func test_test_twitch_api(){
-	// err := twitch.Test_request_user_oath_token(user_id)
-	// if err != nil{
-	// 	panic(err)
-	// }
+	err := twitch.Test_request_user_oath_token(user_id)
+	if err != nil{
+		panic(err)
+	}
 
-	// err := sqlite.Write_twitch_info(user_id, "Name", "1a8056d6b5e1ee9", "", "not important", "bearer", "","",0,0,"")
+	// err := sqlite.Write_twitch_info("29277192", "Name", "0b29b051f1bd920", "", "not important", "bearer", "","",0,0,"")
 
 	// if err!=nil{
 	// 	panic(err)
 	// }
 
-	// user, err := sqlite.Get_twitch_user("sub", user_id)	
-
-	// if err!= nil{
-	// 	fmt.Println(err)
-	// }
-
-	// err = twitch.Start_prediction(user)
-
-	// if err!= nil{
-	// 	panic(err)
-	// }
-
-	// prediction_id, _, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
-
-	// if err !=nil{
-	// 	fmt.Println(err)
-	// }
-
-	// status, err := twitch.Check_prediction(user.User_id, user.Access_token, prediction_id)
-
-	// if err!= nil{
-	// 		panic(err)
-	// }
-
-	// fmt.Println(status)
-
-	// outcome, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
-
-	// if err !=nil{
-	// 	panic(err)
-	// }
-
-	// fmt.Println(outcome)
-
-	// err = twitch.End_prediction(prediction_id, outcome, user.User_id, user.Access_token)
-
-	// if err!=nil{
-	// 	panic(err)
-	// }
-
-}
-
-func Test_clash_api(){
-	player_tag := "2VL9VP8Y0"
-	battles, err := clash.Get_prior_battles(player_tag)
-
-	if err!=nil{
-		panic(err)
-	}
-	// fmt.Println(battles.Matches[0].Team)
-
-	past_time, err :=  time.Parse(time.RFC3339, "2025-02-09T05:27:50Z")
-
-	if err!=nil{
-		panic(err)
-	}
-
-	battle_0 := battles.Matches[0]
-
-	result, err := clash.New_battle(player_tag, past_time)
-	if err!=nil{
-		panic(err)
-	}
-	time, err := clash.String_time_to_time_time(battle_0.BattleTime)
-
-	if err!=nil{
-		panic(err)
-	}
-
-	fmt.Println(time)
-	fmt.Println(result)
-}
-
-func test_app(){
 	user, err := sqlite.Get_twitch_user("sub", user_id)	
 
 	if err!= nil{
 		fmt.Println(err)
 	}
-
-	err = app.Start_prediction_app(user.User_id)
-
+	err = server.Create_EventSub(user, "stream.online")
 	if err!=nil{
 		panic(err)
 	}
+
 }
 
 
+// func test_app(){
+// 	user, err := sqlite.Get_twitch_user("sub", user_id)	
+
+// 	if err!= nil{
+// 		fmt.Println(err)
+// 	}
+
+// 	err = app.Start_prediction_app(user.User_id)
+
+// 	if err!=nil{
+// 		panic(err)
+// 	}
+// }
 
 func test_event_sub(){
 	user, err := sqlite.Get_twitch_user("sub", user_id)	
@@ -207,13 +133,10 @@ func test_event_sub(){
 		fmt.Println(err)
 	}
 
-	err = server.Create_EventSub(user, "streamup")
+	err = server.Create_EventSub(user, "stream.online")
 
 	if err!=nil{
 		fmt.Println(err)
 		panic(err)
 	}
-
-
-
 }

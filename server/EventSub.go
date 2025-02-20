@@ -5,13 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"net/url"
 	"fmt"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
 //const sub_uri = "https://api.twitch.tv/helix/eventsub/subscriptions"
-const sub_uri = "http://localhost:8080/mock/eventsub/subscriptions"
+const sub_uri = "http://localhost:8080/eventsub/subscriptions"
 
 //This is the callback that needs to handle the challenge
 const my_website = "http://localhost:3000/subscription_handler"
@@ -23,31 +22,45 @@ func Create_EventSub(user sqlite.Twitch_user, sub_type string)(error){
 
 	bearer_string := "Bearer " + app_secret 
 
-	url_quary := url.Values{}
-	url_quary.Set("Authorization", bearer_string)
-	url_quary.Set("Client-Id", App_id)
-	url_quary.Set("Content-Type", "application/json")
-	url_quary.Encode()
+	// url_quary := url.Values{}
+	// url_quary.Set("Authorization", bearer_string)
+	// url_quary.Set("Client-Id", App_id)
+	// url_quary.Set("Content-Type", "application/json")
+	// url_quary.Encode()
+
+	// fmt.Println(url_quary)
 
 	req_body, err := create_sub_request_body(user, sub_type)
+
 
 	if err!=nil{
 		fmt.Println(err)
 		return err
 	}
+	fmt.Println(string(req_body))
+
 	req, err := http.NewRequest("POST", sub_uri, bytes.NewBuffer(req_body))
-	
+
 	if err!=nil{
 		fmt.Println("err")
 		return err
 	}
+
+	req.Header.Set("Authorization", bearer_string)
+	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Content-Type", "application/json")
+
 	resp, err := client.Do(req)
 
 	if err!=nil || resp.StatusCode != http.StatusOK{
+		fmt.Println("Do we get down here? Its the probl")
 		fmt.Println(resp.Status)
 		fmt.Println(err)
 		return err
 	}
+	fmt.Println(resp.Status)
+	defer resp.Body.Close()
+	fmt.Println("Do we get down here?")
 
 	return nil
 }
@@ -63,15 +76,16 @@ func create_sub_request_body(user sqlite.Twitch_user, sub_type string)([]byte, e
 	// 	return nil, err	
 	// }
 
+	//FIX THE TYPES
 	err := errors.New("No err")
 	
-	body := WebhookEvent{
+	body := EventSubRequest{
 		Type: sub_type,
 		Version: "1",
-		Condition: Condition_User_ID{
+		Condition: ConditionSubRequest{
 			UserID: user.User_id,
 		},
-		Transport : Transport_Secret{
+		Transport : TransportSubRequest{
 			Method: "webhook",
 			Callback: my_website,
 			Secret: secret},
@@ -84,7 +98,6 @@ func create_sub_request_body(user sqlite.Twitch_user, sub_type string)([]byte, e
 	}
 
 	return body_byte, nil
-
 }
 
 func respond_challenge(w http.ResponseWriter, body []byte){

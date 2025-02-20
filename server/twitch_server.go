@@ -38,12 +38,17 @@ func Start_server() {
 		}
 	}
 
+	handle_event := func(w http.ResponseWriter, req *http.Request){
+
+	}
+
 	alive := func(w http.ResponseWriter, req *http.Request){
 		fmt.Println("We are here!")
 	}
 
 	http.HandleFunc("/redirect", redirect_uri)
 	http.HandleFunc("/subscription_handler", subscription_callback)
+	http.HandleFunc("/receive_twitch_event", handle_event)
 	http.HandleFunc("/", alive)
 
 	http.ListenAndServe("localhost:3000", nil)
@@ -99,4 +104,14 @@ func proccess_authorization_form(req *http.Request)(error){
 	}
 
    return err
+}
+
+func event_handler(w http.ResponseWriter, req *http.Request)(error){
+	err := Handle_event(w, req)
+
+	if err!=nil{
+		w.WriteHeader(http.StatusInternalServerError) 	
+	}
+
+	return nil
 }
