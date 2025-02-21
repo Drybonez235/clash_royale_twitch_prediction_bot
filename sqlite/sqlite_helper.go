@@ -43,29 +43,40 @@ func Create_twitch_database() error {
 		return err
 	}
 
-	defer db.Close()
+	// defer db.Close()
 
-	err = db.Exec(`CREATE TABLE state (state_value text)`)
-	if err != nil{
-		err = errors.New("there was a problem creating the  state table")
-		return err
-	}
+	// err = db.Exec(`CREATE TABLE state (state_value text)`)
+	// if err != nil{
+	// 	err = errors.New("there was a problem creating the  state table")
+	// 	return err
+	// }
 
-	err = db.Exec(`CREATE TABLE twitch_user_info (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
-	app_received text, token_exp float, token_iat float, token_iss text)`)
+	// err = db.Exec(`CREATE TABLE twitch_user_info (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
+	// app_received text, token_exp float, token_iat float, token_iss text)`)
+
+	// if err!=nil{
+	// 	return err
+	// }
+	// err = db.Exec(`CREATE TABLE prediction (broadcaster_id text, prediction_id text, status text, created_at text)`)
+
+	// if err != nil{
+	// 	err = errors.New("there was a problem creating the twitch_user_info table")
+	// 	return err
+	// }
+
+	// err = db.Exec(`CREATE TABLE outcomes (prediction_id text, outcome_id text, title text, lose_win int)`)
+
+	// if err!=nil{
+	// 	return err
+	// }
+
+	err = db.Exec(`CREATE TABLE Sub_Events (Sub_Event_ID text)`)
 
 	if err!=nil{
 		return err
 	}
-	err = db.Exec(`CREATE TABLE prediction (broadcaster_id text, prediction_id text, status text, created_at text)`)
 
-	if err != nil{
-		err = errors.New("there was a problem creating the twitch_user_info table")
-		return err
-	}
-
-	err = db.Exec(`CREATE TABLE outcomes (prediction_id text, outcome_id text, title text, lose_win int)`)
-
+	defer db.Close()
 	return err
 }
 
@@ -356,6 +367,8 @@ func Delete_outcomes(db *sqlite3.Conn, prediction_id string) error{
 }
 func Delete_all_predictions(sub string) error{
 	db, err := open_db()
+	defer db.Close()
+
 	if err!=nil{
 		return err
 	}
@@ -366,5 +379,45 @@ func Delete_all_predictions(sub string) error{
 		return err
 	}
 	return err
+}
+
+func Write_sub_event(event_id string) error{
+	db, err := open_db()
+	defer db.Close()
+
+	if err!=nil{
+		return err
+	}
+	sql_query_string := fmt.Sprintf(`INSERT INTO Sub_Events (Sub_Event_ID) VALUES ('%s')`, event_id)
+
+	err = db.Exec(sql_query_string)
+	if err != nil{
+		return err
+	}
+
+	return nil
+}
+
+func Get_sub_event(event_id string)(bool, error){
+	db, err := open_db()
+
+	if err!=nil{
+		return false, err
+	}
+	defer db.Close()
+
+	sql_query_string := fmt.Sprintf(`SELECT * FROM Sub_Events WHERE Sub_Event_ID == '%s'`, event_id)
+
+	sql_query, _, err := db.Prepare(sql_query_string)
+
+	if err!=nil{
+		return false, err
+	}
+
+	if sql_query.Step() {
+		return true, nil
+	} 
+
+	return false, nil
 }
 

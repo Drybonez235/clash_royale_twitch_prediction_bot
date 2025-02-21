@@ -10,6 +10,8 @@ import (
 )
 
 func Start_prediction_app(sub string) error {
+	fmt.Println("Started the prediction app.")
+	
 	user, err := sqlite.Get_twitch_user("sub", sub)
 
 	if err!=nil{

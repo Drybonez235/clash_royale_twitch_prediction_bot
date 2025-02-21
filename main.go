@@ -6,7 +6,7 @@ import (
 	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
-	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
 //So at this point I am trying to set up a system that checks to make siure the token is valid. IF it isn't valid, I need to request a new token using a refresh token. Then I am wrtiing
@@ -26,25 +26,25 @@ func main(){
 	if err!=nil{panic(err)}
 	fmt.Println(var2)
 
-
- 	//server.Start_server()
+	//test_db()
+ 	server.Start_server()
 	//test_event_sub()
 	//test_app()
-	test_test_twitch_api()
+	//test_test_twitch_api()
 }
 
 func test_db(){
-	// err := sqlite.Create_twitch_database()
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	user, err := sqlite.Get_twitch_user("sub","651008027")
-
-	if err!=nil{
+	err := sqlite.Create_twitch_database()
+	if err != nil{
 		panic(err)
 	}
-	fmt.Println(user)
+
+	// user, err := sqlite.Get_twitch_user("sub","651008027")
+
+	// if err!=nil{
+	// 	panic(err)
+	// }
+	// fmt.Println(user)
 
 	// status, err := twitch.Validate_token(user.Access_token, user.User_id)
 
@@ -88,26 +88,26 @@ func test_twitch_api(){
 }
 
 func test_test_twitch_api(){
-	err := twitch.Test_request_user_oath_token(user_id)
-	if err != nil{
-		panic(err)
-	}
+	// err := twitch.Test_request_user_oath_token(user_id)
+	// if err != nil{
+	// 	panic(err)
+	// }
 
-	// err := sqlite.Write_twitch_info("29277192", "Name", "0b29b051f1bd920", "", "not important", "bearer", "","",0,0,"")
+	// err := sqlite.Write_twitch_info("29277192", "Name", "ae76949876089d2", "", "not important", "bearer", "","",0,0,"")
 
 	// if err!=nil{
 	// 	panic(err)
 	// }
 
-	user, err := sqlite.Get_twitch_user("sub", user_id)	
+	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 
-	if err!= nil{
-		fmt.Println(err)
-	}
-	err = server.Create_EventSub(user, "stream.online")
-	if err!=nil{
-		panic(err)
-	}
+	// if err!= nil{
+	// 	fmt.Println(err)
+	// }
+	// err = server.Create_EventSub(user, "stream.online")
+	// if err!=nil{
+	// 	panic(err)
+	// }
 
 }
 

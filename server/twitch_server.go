@@ -39,7 +39,8 @@ func Start_server() {
 	}
 
 	handle_event := func(w http.ResponseWriter, req *http.Request){
-
+		err := event_handler(w, req)
+		fmt.Println(err)
 	}
 
 	alive := func(w http.ResponseWriter, req *http.Request){
@@ -74,6 +75,8 @@ func subscription_handler(req *http.Request, w http.ResponseWriter)(bool,error){
 
 
 func proccess_authorization_form(req *http.Request)(error){
+	fmt.Println("Proccessed auth form")
+	
 	var response Authorization_JSON
 
 	err := req.ParseForm()
@@ -107,10 +110,12 @@ func proccess_authorization_form(req *http.Request)(error){
 }
 
 func event_handler(w http.ResponseWriter, req *http.Request)(error){
+	fmt.Println("Recieved an event")
 	err := Handle_event(w, req)
 
 	if err!=nil{
-		w.WriteHeader(http.StatusInternalServerError) 	
+		w.WriteHeader(http.StatusInternalServerError) 
+		return err	
 	}
 
 	return nil
