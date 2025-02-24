@@ -24,6 +24,7 @@ type Twitch_user struct{
 	Token_exp int
 	Token_iat int
 	Token_iss string
+	Online int
 }
 
 func open_db()(*sqlite3.Conn, error){
@@ -43,32 +44,32 @@ func Create_twitch_database() error {
 		return err
 	}
 
-	// defer db.Close()
+	defer db.Close()
 
-	// err = db.Exec(`CREATE TABLE state (state_value text)`)
-	// if err != nil{
-	// 	err = errors.New("there was a problem creating the  state table")
-	// 	return err
-	// }
+	err = db.Exec(`CREATE TABLE state (state_value text)`)
+	if err != nil{
+		err = errors.New("there was a problem creating the  state table")
+		return err
+	}
 
-	// err = db.Exec(`CREATE TABLE twitch_user_info (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
-	// app_received text, token_exp float, token_iat float, token_iss text)`)
+	err = db.Exec(`CREATE TABLE twitch_user_info (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
+	app_received text, token_exp float, token_iat float, token_iss text, online int)`)
 
-	// if err!=nil{
-	// 	return err
-	// }
-	// err = db.Exec(`CREATE TABLE prediction (broadcaster_id text, prediction_id text, status text, created_at text)`)
+	if err!=nil{
+		return err
+	}
+	err = db.Exec(`CREATE TABLE prediction (broadcaster_id text, prediction_id text, status text, created_at text)`)
 
-	// if err != nil{
-	// 	err = errors.New("there was a problem creating the twitch_user_info table")
-	// 	return err
-	// }
+	if err != nil{
+		err = errors.New("there was a problem creating the twitch_user_info table")
+		return err
+	}
 
-	// err = db.Exec(`CREATE TABLE outcomes (prediction_id text, outcome_id text, title text, lose_win int)`)
+	err = db.Exec(`CREATE TABLE outcomes (prediction_id text, outcome_id text, title text, lose_win int)`)
 
-	// if err!=nil{
-	// 	return err
-	// }
+	if err!=nil{
+		return err
+	}
 
 	err = db.Exec(`CREATE TABLE Sub_Events (Sub_Event_ID text)`)
 
@@ -163,7 +164,7 @@ func delete_state_nonce(state_nonce string, table string, db *sqlite3.Conn) erro
 }
 
 func Write_twitch_info(sub string, display_name string, access_token string, refresh_token string, scope string, token_type string,
-	 app_request string, app_received string, token_exp int, token_iat int, token_iss string) error {
+	 app_request string, app_received string, token_exp int, token_iat int, token_iss string, online int) error {
 		err := Remove_twitch_user(sub)
 		if err!=nil{
 			return err
@@ -176,8 +177,8 @@ func Write_twitch_info(sub string, display_name string, access_token string, ref
 		}
 		//(sub text, access_token text, refresh_token text, scope text, token_type text, app_request text
 			//app_received text, token_exp float, token_iat float, token_iss text)
-		sql_table_values := "'sub', 'display_name', 'access_token', 'refresh_token', 'scope', 'token_type', 'app_request', 'app_received', 'token_exp', 'token_iat', 'token_iss'"
-		sql_command := fmt.Sprintf("INSERT INTO twitch_user_info (%s) VALUES ('%s', '%s' , '%s', '%s', '%s', '%s', '%s', '%s', %d, %d, '%s')", sql_table_values, sub, display_name, access_token, refresh_token, scope, token_type, app_request, app_received, token_exp, token_iat, token_iss)
+		sql_table_values := "'sub', 'display_name', 'access_token', 'refresh_token', 'scope', 'token_type', 'app_request', 'app_received', 'token_exp', 'token_iat', 'token_iss', 'online'"
+		sql_command := fmt.Sprintf("INSERT INTO twitch_user_info (%s) VALUES ('%s', '%s' , '%s', '%s', '%s', '%s', '%s', '%s', %d, %d, '%s', %d)", sql_table_values, sub, display_name, access_token, refresh_token, scope, token_type, app_request, app_received, token_exp, token_iat, token_iss, online)
 		err = db.Exec(sql_command)	
 		if err!=nil{
 			fmt.Println(err)
@@ -221,9 +222,60 @@ func Get_twitch_user(id_type string, id string) (Twitch_user, error){
 		twitch_user.Token_exp= sql_query.ColumnInt(8)
 		twitch_user.Token_iat= sql_query.ColumnInt(9)
 		twitch_user.Token_iss= sql_query.ColumnText(10)
+		twitch_user.Online = sql_query.ColumnInt(11)
 	} 
 	defer db.Close()
 	return twitch_user, err	
+}
+
+func Twitch_user_online(sub string)(bool, error){
+	db, err := open_db()
+
+	if err!=nil{return false, err}
+
+	defer db.Close()
+
+	sql_query_string := fmt.Sprintf(`SELECT online FROM twitch_user_info WHERE sub=='%s'`, sub)
+
+	sql_query, _, err := db.Prepare(sql_query_string)	
+
+	if err!=nil{
+		return false, err
+	}
+
+	false_true := 3
+
+	for sql_query.Step(){
+		false_true = sql_query.ColumnInt(0)
+	}
+
+	if false_true == 0{
+		return false, nil
+	} else if false_true == 1{
+		return true, nil
+	} else {
+		err = errors.New("twitch user online not set")
+		return false, err
+	}
+}
+
+func Update_online(sub string, online int)(error){
+	db, err := open_db()
+
+	if err!=nil{return err}
+
+	if online != 0 || online != 1{
+		err = errors.New("online must be 1 or 0")
+		return err
+	}
+
+	sql_query_string := fmt.Sprintf(`UPDATE twitch_user_info SET online = %d WHERE sub=='%s'`,online, sub)
+	err = db.Exec(sql_query_string)
+
+	if err!=nil{
+		return err
+	}
+	return nil
 }
 
 func Update_tokens(access_token string, refresh_token string, sub string)(error){

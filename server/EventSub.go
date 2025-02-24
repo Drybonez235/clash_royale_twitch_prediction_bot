@@ -76,7 +76,6 @@ func create_sub_request_body(user sqlite.Twitch_user, sub_type string)([]byte, e
 	// 	return nil, err	
 	// }
 
-	//FIX THE TYPES
 	err := errors.New("No err")
 	
 	body := EventSubRequest{

@@ -13,22 +13,24 @@ func Start_prediction_app(sub string) error {
 	fmt.Println("Started the prediction app.")
 	
 	user, err := sqlite.Get_twitch_user("sub", sub)
-
+	fmt.Println(sub)
 	if err!=nil{
 		panic(err)
 	}
 
-	stream := true //, err := twitch.Check_stream_status(sub)
+	stream, err := sqlite.Twitch_user_online(sub)
 
-	// if err!=nil{
-	// 	return err
-	// }
+	if err!=nil{
+		return err
+	}
 
 
 	for stream {
 		//We have to check to see if there is an active prediction here that was set by me. IF it was not set by me, then we need to wait.
+	prediction_id, _, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
 
-	prediction_id, _,err := sqlite.Get_predictions(user.User_id, "ACTIVE")
+	//The problem is that I check my db to see if there are any active predictions. Right now there is not.
+	//However, when I check tw
 
 	if err!=nil{
 		return err
@@ -60,6 +62,12 @@ func Start_prediction_app(sub string) error {
 		} 
 
 		if err!=nil{
+			return err
+		}
+		stream, err = sqlite.Twitch_user_online(sub)
+
+		if err!=nil{
+			stream = false
 			return err
 		}
 	}
