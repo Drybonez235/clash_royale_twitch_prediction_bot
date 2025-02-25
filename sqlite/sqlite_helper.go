@@ -25,6 +25,7 @@ type Twitch_user struct{
 	Token_iat int
 	Token_iss string
 	Online int
+	Player_tag string
 }
 
 func open_db()(*sqlite3.Conn, error){
@@ -53,7 +54,7 @@ func Create_twitch_database() error {
 	}
 
 	err = db.Exec(`CREATE TABLE twitch_user_info (sub text, display_name text, access_token text, refresh_token text, scope text, token_type text, app_request text,
-	app_received text, token_exp float, token_iat float, token_iss text, online int)`)
+	app_received text, token_exp float, token_iat float, token_iss text, online int, clash_royale_player_tag text)`)
 
 	if err!=nil{
 		return err
@@ -164,7 +165,7 @@ func delete_state_nonce(state_nonce string, table string, db *sqlite3.Conn) erro
 }
 
 func Write_twitch_info(sub string, display_name string, access_token string, refresh_token string, scope string, token_type string,
-	 app_request string, app_received string, token_exp int, token_iat int, token_iss string, online int) error {
+	 app_request string, app_received string, token_exp int, token_iat int, token_iss string, online int, player_tag string) error {
 		err := Remove_twitch_user(sub)
 		if err!=nil{
 			return err
@@ -177,8 +178,8 @@ func Write_twitch_info(sub string, display_name string, access_token string, ref
 		}
 		//(sub text, access_token text, refresh_token text, scope text, token_type text, app_request text
 			//app_received text, token_exp float, token_iat float, token_iss text)
-		sql_table_values := "'sub', 'display_name', 'access_token', 'refresh_token', 'scope', 'token_type', 'app_request', 'app_received', 'token_exp', 'token_iat', 'token_iss', 'online'"
-		sql_command := fmt.Sprintf("INSERT INTO twitch_user_info (%s) VALUES ('%s', '%s' , '%s', '%s', '%s', '%s', '%s', '%s', %d, %d, '%s', %d)", sql_table_values, sub, display_name, access_token, refresh_token, scope, token_type, app_request, app_received, token_exp, token_iat, token_iss, online)
+		sql_table_values := "'sub', 'display_name', 'access_token', 'refresh_token', 'scope', 'token_type', 'app_request', 'app_received', 'token_exp', 'token_iat', 'token_iss', 'online', clash_royale_player_tag"
+		sql_command := fmt.Sprintf("INSERT INTO twitch_user_info (%s) VALUES ('%s', '%s' , '%s', '%s', '%s', '%s', '%s', '%s', %d, %d, '%s', %d, '%s')", sql_table_values, sub, display_name, access_token, refresh_token, scope, token_type, app_request, app_received, token_exp, token_iat, token_iss, online, player_tag)
 		err = db.Exec(sql_command)	
 		if err!=nil{
 			fmt.Println(err)
@@ -223,6 +224,7 @@ func Get_twitch_user(id_type string, id string) (Twitch_user, error){
 		twitch_user.Token_iat= sql_query.ColumnInt(9)
 		twitch_user.Token_iss= sql_query.ColumnText(10)
 		twitch_user.Online = sql_query.ColumnInt(11)
+		twitch_user.Player_tag = sql_query.ColumnText(12)
 	} 
 	defer db.Close()
 	return twitch_user, err	
@@ -323,7 +325,6 @@ func Write_new_prediction(streamer_id string, prediction_id string, created_at s
 	return nil
 }
 
-
 //Maybe instead we can make it accept the array of predictions and then just parse from that.
 func Write_new_prediction_outcomes(predictions []map[string]interface{}) error {
 	db, err := open_db()
@@ -343,6 +344,7 @@ func Write_new_prediction_outcomes(predictions []map[string]interface{}) error {
 	return err
 }
 
+//This gets the prediction id, prediction created at, and an error
 func Get_predictions(sub string, status string) (string,string, error) {
 	db, err := open_db()
 	if err!=nil{

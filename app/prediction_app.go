@@ -95,9 +95,17 @@ func Watch_prediction(sub string, user sqlite.Twitch_user)error{
 
 	new_battle := "no_new_battles"
 
-	for new_battle == "no_new_battles"{
+	for (new_battle == "no_new_battles"){
 
-		new_battle, err := clash.New_battle("2VL9VP8Y0", t_created_at)
+		user, err := sqlite.Get_twitch_user("sub", sub)
+
+		if err!=nil{return err}
+
+		if user.Online != 1{
+			return nil
+		}
+
+		new_battle, err := clash.New_battle(user.Player_tag, t_created_at)
 
 		if err!=nil{
 			return err

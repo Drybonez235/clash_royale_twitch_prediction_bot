@@ -93,7 +93,8 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	// err := sqlite.Write_twitch_info("29277192", "Name", "99467c8a8a7e6c0", "", "not important", "bearer", "","",0,0,"")
+	// err := sqlite.Write_twitch_info("29277192", "Name", "99467c8a8a7e6c0", "", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
+
 
 	// if err!=nil{
 	// 	panic(err)

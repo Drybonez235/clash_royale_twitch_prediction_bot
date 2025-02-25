@@ -2,13 +2,14 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"errors"
 
-	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 	
 func Handle_event(w http.ResponseWriter, req *http.Request)(error){
@@ -84,6 +85,7 @@ func stream_start(streamer_id string)(error){
 	return nil
 }
 
+//Not tested yet
 func stream_end(streamer_id string)(error){
 	var err error
 
@@ -96,6 +98,17 @@ func stream_end(streamer_id string)(error){
 
 	if err!=nil{return err}
 
-	//We need to cancel any current prediction we own.
+	user, err := sqlite.Get_twitch_user("sub", streamer_id)
+
+	if err!=nil{return err}
+
+	prediction_id, _ ,err := sqlite.Get_predictions(streamer_id, "ACTIVE")
+
+	if err!=nil{return err}	
+
+	err = twitch_api.Cancel_prediction(prediction_id, streamer_id, user.Access_token)
+
+	if err!=nil{return err}
+
 	return nil
 }

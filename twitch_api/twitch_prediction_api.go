@@ -263,6 +263,55 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	return nil
 }
 
+func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token string)(error){
+	fmt.Println("Cancel prediction fired")
+	if prediction_id == "" {
+		err := errors.New("prediction id was blank")
+		return err
+	}
+
+	client := &http.Client{}
+	requestBody := map[string]interface{}{
+		"broadcaster_id":     broadcaster_id,
+		"id":                 prediction_id,
+		"status":             "CANCELED",
+		"winning_outcome_id": "null",
+	}
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON: %v", err)
+	}
+	req, err := http.NewRequest("PATCH", twitch_prediction_uri, bytes.NewBuffer(jsonData))
+	if err!=nil{
+		return err
+	}
+	bearer_string := "Bearer "+ bearer_token
+	req.Header.Set("Authorization",bearer_string)
+	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
+	if err!=nil || resp.StatusCode != http.StatusOK{
+		fmt.Println("This is causing the problem")
+		fmt.Println(resp.Status)
+		fmt.Println(resp.Header)
+		return err
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err!=nil{
+		return err
+	}
+	var json_message map[string]interface{} 
+	json.Unmarshal(body, &json_message)
+	fmt.Println("We canceled the prediction")
+	err = sqlite.Delete_prediction_id(broadcaster_id)
+	if err !=nil{
+		return err
+	}
+	return nil
+
+}
+
+
 func Prediction_response_parser(prediction_data_array Prediction_data_array) error{
 	data := prediction_data_array.Data
 	prediction := data[0]
@@ -278,7 +327,7 @@ func Prediction_response_parser(prediction_data_array Prediction_data_array) err
 	for i := 0; i < len(prediction.Outcomes); i++{
 		maps := make(map[string]any)
 		outcome := prediction.Outcomes[i]
-				maps["prediction_id"] = prediction_id
+		maps["prediction_id"] = prediction_id
 		maps["outcome_id"] = outcome.Outcome_id
 		maps["title"] = outcome.Outcome_title
 		if outcome.Outcome_title == "Yes"{

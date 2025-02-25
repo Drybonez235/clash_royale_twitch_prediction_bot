@@ -154,7 +154,7 @@ func Get_claims(oauth_token string, new_user access_token_response_json) (error)
 	}
 //Scope is an array of strings. We need it to be a regular array.
 	err = sqlite.Write_twitch_info(claims_json.Sub, display_name, new_user.Access_token, new_user.Refresh_token, unpacked_scope, new_user.Token_type,
-		claims_json.Aud, claims_json.Aud, claims_json.Exp, claims_json.Iat, claims_json.Iss)
+		claims_json.Aud, claims_json.Aud, claims_json.Exp, claims_json.Iat, claims_json.Iss, 0, "")
 	return err
 }
 
