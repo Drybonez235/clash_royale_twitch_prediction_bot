@@ -40,7 +40,9 @@ func Start_server() {
 
 	handle_event := func(w http.ResponseWriter, req *http.Request){
 		err := event_handler(w, req)
-		fmt.Println(err)
+		if err!=nil{
+			fmt.Println(err)
+		}
 	}
 
 	alive := func(w http.ResponseWriter, req *http.Request){

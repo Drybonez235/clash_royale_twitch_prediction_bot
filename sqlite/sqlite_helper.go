@@ -164,6 +164,7 @@ func delete_state_nonce(state_nonce string, table string, db *sqlite3.Conn) erro
 	return err
 }
 
+//Works with the new fields!
 func Write_twitch_info(sub string, display_name string, access_token string, refresh_token string, scope string, token_type string,
 	 app_request string, app_received string, token_exp int, token_iat int, token_iss string, online int, player_tag string) error {
 		err := Remove_twitch_user(sub)
@@ -266,7 +267,7 @@ func Update_online(sub string, online int)(error){
 
 	if err!=nil{return err}
 
-	if online != 0 || online != 1{
+	if online >= 2 {
 		err = errors.New("online must be 1 or 0")
 		return err
 	}

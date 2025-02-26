@@ -13,7 +13,7 @@ import (
 )
 	
 func Handle_event(w http.ResponseWriter, req *http.Request)(error){
-	fmt.Println("We are hadnling the event!")
+	fmt.Println("We are handling the event!")
 	var webhook_struct WebhookNotification
 
 	req_body, err := io.ReadAll(req.Body)
@@ -68,19 +68,18 @@ func stream_start(streamer_id string)(error){
 		return err
 	}
 
+
 	err = sqlite.Update_online(streamer_id, 1)
 
 	if err!=nil{
+		fmt.Println(err)
 		return err
 	}
 
 	fmt.Println("This is the user id")
 	fmt.Println(user.User_id)
-	go app.Start_prediction_app(user.User_id)
 
-	if err!=nil{
-		return err
-	}
+	go app.Start_prediction_app(user.User_id)
 
 	return nil
 }
