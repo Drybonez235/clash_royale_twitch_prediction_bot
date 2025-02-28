@@ -3,7 +3,6 @@ package sqlite
 import (
 	"errors"
 	"fmt"
-
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	"github.com/ncruces/go-sqlite3"
 	_ "github.com/ncruces/go-sqlite3/driver"
@@ -26,6 +25,12 @@ type Twitch_user struct{
 	Token_iss string
 	Online int
 	Player_tag string
+}
+
+type Twitch_user_refresh struct{
+	User_id string
+	Access_token string
+	Refresh_token string
 }
 
 func open_db()(*sqlite3.Conn, error){
@@ -476,3 +481,30 @@ func Get_sub_event(event_id string)(bool, error){
 	return false, nil
 }
 
+func Get_all_access_tokens()([]Twitch_user_refresh, error){
+	db, err := open_db()
+
+	sql_query_string := `SELECT * FROM twitch_user_info`
+
+	var Refresh_list []Twitch_user_refresh
+	var Twitch_refresh Twitch_user_refresh
+
+	if err!=nil{
+		return  Refresh_list ,err
+	}
+
+	sql_query, _ ,err := db.Prepare(sql_query_string)
+
+	if err !=nil{
+		return Refresh_list, err
+	}
+
+	for sql_query.Step(){
+		Twitch_refresh.Access_token = sql_query.ColumnText(2)
+		Twitch_refresh.Refresh_token = sql_query.ColumnText(3)
+		Twitch_refresh.User_id = sql_query.ColumnText(0)
+		Refresh_list = append(Refresh_list, Twitch_refresh)
+	}
+
+	return Refresh_list, nil
+}
