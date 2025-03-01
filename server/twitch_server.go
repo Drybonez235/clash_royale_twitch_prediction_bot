@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
+	// "os"
+	// "os/signal"
+	// "syscall"
+	// "time"
 
 	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
@@ -21,16 +24,24 @@ type Authorization_JSON struct {
 func Start_server(logger *logger.StandardLogger) {
 	logger.Info("Started server on localhost 3000")
 	defer logger.Info("Server stopped for some reason")
-	ticker :=time.NewTicker(1 * time.Hour)
-	defer ticker.Stop()
 
-	for range ticker.C{
-		err := verfify_tokens()
-		if err!=nil{
-			logger.Error(err.Error())
-		}
-		logger.Info("Verified tokens")
-	}
+	// ticker := time.NewTicker(1 * time.Hour)
+	// defer ticker.Stop()
+
+	// go func () {
+	// 	for range ticker.C{
+	// 	err := verfify_tokens()
+	// 	if err!=nil{
+	// 		logger.Error(err.Error())
+	// 	}
+	// 	logger.Info("Verified tokens")
+	// 	}
+	// }()
+
+	// sigChan := make(chan os.Signal, 1)
+	// signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	// <-sigChan
 
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
 		logger.Info("Recived an app request")

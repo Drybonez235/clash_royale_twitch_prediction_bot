@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"log"
 	//app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
@@ -30,11 +28,7 @@ func main(){
 	var2, err := clash.String_time_to_time_time("20240101T0202002Z")
 	if err!=nil{panic(err)}
 	fmt.Println(var2)
-	test_test_twitch_api()
-
-	test_get_all_access_tokens()
-
-	//test_db()
+		//test_db()
  	server.Start_server(logger)
 	//test_event_sub()
 	//test_app()
@@ -92,16 +86,16 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	err := sqlite.Write_twitch_info("29277192", "Name", "b9200d33b7b6611", "ghsifnwofieflakdjenfonf", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
+	err := sqlite.Write_twitch_info("29277192", "Name", "9d4bc3bbde86b87", "ghsifnwofieflakdjenfonf", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
 
 	if err!=nil{
 		panic(err)
 	}
-	err = sqlite.Write_twitch_info("10209020", "Name", "hgjofhqofn", "ig0pqidhduchauhd", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
+	// err = sqlite.Write_twitch_info("10209020", "Name", "hgjofhqofn", "ig0pqidhduchauhd", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
 
-	if err!=nil{
-		panic(err)
-	}
+	// if err!=nil{
+	// 	panic(err)
+	// }
 
 	// user, err := sqlite.Get_twitch_user("sub", user_id)	
 

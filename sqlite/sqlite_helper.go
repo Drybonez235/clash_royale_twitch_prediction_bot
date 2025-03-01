@@ -208,7 +208,7 @@ func Get_twitch_user(id_type string, id string) (Twitch_user, error){
 		err = errors.New("invalid id type")
 		return twitch_user, err
 	}
-	sql_query_string := fmt.Sprintf(`SELECT TOP 1 FROM twitch_user_info WHERE %s == '%s'`, field, id)
+	sql_query_string := fmt.Sprintf(`SELECT * FROM twitch_user_info WHERE %s == '%s'`, field, id)
 	sql_query, _, err := db.Prepare(sql_query_string)
 	if err != nil{
 		return twitch_user, err
