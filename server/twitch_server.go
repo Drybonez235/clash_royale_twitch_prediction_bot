@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
@@ -18,6 +19,13 @@ type Authorization_JSON struct {
 func Start_server() {
 
 	fmt.Println("Started server on localhost 3000")
+
+	ticker :=time.NewTicker(1 * time.Hour)
+	defer ticker.Stop()
+
+	for range ticker.C{
+		verfify_tokens()
+	}
 
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Recieved an app request")
@@ -53,6 +61,8 @@ func Start_server() {
 	http.HandleFunc("/subscription_handler", subscription_callback)
 	http.HandleFunc("/receive_twitch_event", handle_event)
 	http.HandleFunc("/", alive)
+
+	
 
 	http.ListenAndServe("localhost:3000", nil)
 }
@@ -122,3 +132,11 @@ func event_handler(w http.ResponseWriter, req *http.Request)(error){
 
 	return nil
 }
+
+func verfify_tokens()(){
+	err := Validate_all_tokens()
+	if err!=nil{
+		fmt.Println(err)
+	}
+}
+ 

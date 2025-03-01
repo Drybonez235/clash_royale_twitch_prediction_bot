@@ -64,7 +64,6 @@ type Refresh_token_response struct{
 	Refresh_token string `json:"refresh_token"`
 	Scope []string `json:"scope"`
 	Token_type string `json:"token_type"`
-
 }
 
 func Request_user_oath_token(code string) (error) {
@@ -236,37 +235,6 @@ func request_app_oath_token() (string, error) {
 		return "", err	
 	}
 	return app_oauth_token_json.Access_token, err
-}
-
-func Validate_token(AOauth_token string, sub string, refresh_token string) (bool, error){
-	fmt.Println("Validate token ran")
-	twitch_validation_endpoint := "https://id.twitch.tv/oauth2/validate"
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", twitch_validation_endpoint, nil)
-	if err != nil{
-		err = errors.New("there was something wrong with the GET request")
-		return false, err	
-	}
-	req.Header.Set("Authorization", "OAuth " + AOauth_token)
-	resp, err := client.Do(req)
-	if err != nil{
-		err = errors.New("there was something wrong with the GET response")
-		return false, err	
-	}
-	body, err := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK{
-		refreshed, err := Refresh_token(refresh_token, sub)
-		if err !=nil{
-			return false, err
-		}
-		if !refreshed {
-			panic(err)
-		}
-		return false, nil
-	}
-	return true, err
 }
 
 func Refresh_token(refresh_token string, user_id string) (bool, error){

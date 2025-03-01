@@ -25,9 +25,12 @@ func main(){
 	var2, err := clash.String_time_to_time_time("20240101T0202002Z")
 	if err!=nil{panic(err)}
 	fmt.Println(var2)
+	test_test_twitch_api()
+
+	test_get_all_access_tokens()
 
 	//test_db()
- 	server.Start_server()
+ 	//server.Start_server()
 	//test_event_sub()
 	//test_app()
 	//test_test_twitch_api()
@@ -52,27 +55,18 @@ func test_db(){
 	// 	fmt.Println(status)
 	// }
 
-	// if !status{
-	// refreshed, err := twitch.Refresh_token(user.Refresh_token, user.User_id)
+}
 
-	// 	if !refreshed || err !=nil{
-	// 		panic(err)
-	// 	}
-	// fmt.Println(refreshed)
-	// 	user, err = sqlite.Get_twitch_user("sub", user.User_id)
-	// 	if !refreshed || err !=nil{
-	// 		panic(err)
-	// 	}
-	// }
+func test_get_all_access_tokens(){
+	Access_tokens, err := sqlite.Get_all_access_tokens()
 
-	// fmt.Println(status)
+	if err!=nil{
+		panic(err)
+	}
 
-	// err = twitch.Start_prediction(user.Access_token, user.User_id, user.Display_Name)
-	// if err!=nil{
-	// 	panic(err)
-	// }	
-	// sqlite.Remove_twitch_user(user_id)
-
+	for i:=0; i < len(Access_tokens); i++{
+		fmt.Println(Access_tokens[i])
+	}
 }
 
 func test_twitch_api(){
@@ -93,8 +87,12 @@ func test_test_twitch_api(){
 	// 	panic(err)
 	// }
 
-	err := sqlite.Write_twitch_info("29277192", "Name", "b9200d33b7b6611", "", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
+	err := sqlite.Write_twitch_info("29277192", "Name", "b9200d33b7b6611", "ghsifnwofieflakdjenfonf", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
 
+	if err!=nil{
+		panic(err)
+	}
+	err = sqlite.Write_twitch_info("10209020", "Name", "hgjofhqofn", "ig0pqidhduchauhd", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
 
 	if err!=nil{
 		panic(err)
