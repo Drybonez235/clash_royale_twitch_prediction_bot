@@ -53,14 +53,9 @@ func Create_EventSub(user sqlite.Twitch_user, sub_type string)(error){
 	resp, err := client.Do(req)
 
 	if err!=nil || resp.StatusCode != http.StatusOK{
-		fmt.Println("Do we get down here? Its the probl")
-		fmt.Println(resp.Status)
-		fmt.Println(err)
 		return err
 	}
-	fmt.Println(resp.Status)
 	defer resp.Body.Close()
-	fmt.Println("Do we get down here?")
 
 	return nil
 }
@@ -100,7 +95,6 @@ func create_sub_request_body(user sqlite.Twitch_user, sub_type string)([]byte, e
 }
 
 func respond_challenge(w http.ResponseWriter, body []byte){
-	fmt.Println("Respond to challenge fired")
 	var data Challenge_struct
 	if err := json.Unmarshal(body, &data); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)

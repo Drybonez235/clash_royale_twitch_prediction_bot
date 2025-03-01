@@ -20,8 +20,6 @@ const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
 const user_id = "29277192"
 
 func main(){
-
-	
 	
 	logger := logger.NewStandardLogger()
 	// var1, err := twitch.Get_display_name("29277192")

@@ -6,8 +6,10 @@ import (
 	"io"
 	"net/http"
 	"time"
+
 	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
 type Authorization_JSON struct {
@@ -17,59 +19,70 @@ type Authorization_JSON struct {
 }
 
 func Start_server(logger *logger.StandardLogger) {
-
-	fmt.Println("Started server on localhost 3000")
-
+	logger.Info("Started server on localhost 3000")
+	defer logger.Info("Server stopped for some reason")
 	ticker :=time.NewTicker(1 * time.Hour)
 	defer ticker.Stop()
 
 	for range ticker.C{
-		verfify_tokens()
+		err := verfify_tokens()
+		if err!=nil{
+			logger.Error(err.Error())
+		}
+		logger.Info("Verified tokens")
 	}
 
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
-		fmt.Println("Recieved an app request")
-		logger.Info("Recived an app reques")
-		proccess_authorization_form(req)
+		logger.Info("Recived an app request")
+		valid, err := proccess_authorization_form(req)
+
+		if err!=nil{
+			logger.Error(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+		} 
+		
+		if !valid{
+			logger.Warn(err.Error())
+			w.WriteHeader(http.StatusUnauthorized)
+		}
+
+		logger.Info("Registered a user from " + req.URL.String())
 	}
 
 	subscription_callback := func(w http.ResponseWriter, req *http.Request){
-		fmt.Println("Subscription call back fired")
+
 		handled, err  := subscription_handler(req, w)
 
 		if err!=nil{
 			w.WriteHeader(http.StatusInternalServerError) 
+			logger.Error(err.Error())
 		}
 
 		if !handled {
 			w.WriteHeader(http.StatusInternalServerError)
+			logger.Warn("Subscription callback was not handled correctly")
 			return
 		}
 	}
 
 	handle_event := func(w http.ResponseWriter, req *http.Request){
-		err := event_handler(w, req)
+		err := event_handler(w, req, logger)
 		if err!=nil{
 			logger.Error(err.Error())
 		}
+		logger.Info("Logged event" + req.URL.String())
 	}
 
-	alive := func(w http.ResponseWriter, req *http.Request){
-		fmt.Println("We are here!")
-	}
 
 	http.HandleFunc("/redirect", redirect_uri)
 	http.HandleFunc("/subscription_handler", subscription_callback)
 	http.HandleFunc("/receive_twitch_event", handle_event)
-	http.HandleFunc("/", alive)
-
 	
 
 	http.ListenAndServe("localhost:3000", nil)
 }
 
 func subscription_handler(req *http.Request, w http.ResponseWriter)(bool,error){
-	fmt.Println("Subscription handler function below fired")
 
 	body, err := io.ReadAll(req.Body)
 	if err!=nil{
@@ -77,17 +90,17 @@ func subscription_handler(req *http.Request, w http.ResponseWriter)(bool,error){
 	}
 	valid, err := verify_event_message(req, body)
 	if err!=nil{
-		return false,err
+		return false, err
 	}
 	if !valid{
-		return false, nil
+		return false, err
 	}
 	respond_challenge(w, body)
 	return true, nil
 }
 
 
-func proccess_authorization_form(req *http.Request)(error){
+func proccess_authorization_form(req *http.Request)(bool, error){
 	fmt.Println("Proccessed auth form")
 	
 	var response Authorization_JSON
@@ -95,8 +108,8 @@ func proccess_authorization_form(req *http.Request)(error){
 	err := req.ParseForm()
 
 	if err != nil{
-		err = errors.New("problem reading form values")
-		return err
+		err = errors.New("problem reading authorization form values")
+		return false, err
 	}
 
 	response.scope = req.FormValue("scope")
@@ -105,39 +118,39 @@ func proccess_authorization_form(req *http.Request)(error){
 
 	valid, err := sqlite.Check_state_nonce(response.state, "state")
 
-	if !valid || err !=nil {
-		err = errors.New("invalid state. Malicious request or the check state didn't work")
-		return err
+	if err !=nil {
+		return false, err
 	}
 
-	fmt.Println(response)
+	if !valid{
+		err = errors.New("malicious request: State not found in db")
+		return false, err
+	}
 
-	//err = Request_user_oath_token(response.code)
+	err = twitch_api.Request_user_oath_token(response.code)
 
 	if err!=nil{
-		fmt.Println(err)
-		err = errors.New("there was a propbelm with oauth token request")
+		return false, err
 	}
 
-   return err
+   return true, nil
 }
 
-func event_handler(w http.ResponseWriter, req *http.Request)(error){
-	fmt.Println("Recieved an event")
-	err := Handle_event(w, req)
+func event_handler(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger)(error){
+	err := Handle_event(w, req, logger)
 
 	if err!=nil{
 		w.WriteHeader(http.StatusInternalServerError) 
 		return err	
 	}
-
 	return nil
 }
 
-func verfify_tokens()(){
+func verfify_tokens()(error){
 	err := Validate_all_tokens()
 	if err!=nil{
-		fmt.Println(err)
+		return err
 	}
+	return nil
 }
  
