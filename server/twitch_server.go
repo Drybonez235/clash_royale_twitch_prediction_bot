@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 	"time"
-
+	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
@@ -16,7 +16,7 @@ type Authorization_JSON struct {
 	state string
 }
 
-func Start_server() {
+func Start_server(logger *logger.StandardLogger) {
 
 	fmt.Println("Started server on localhost 3000")
 
@@ -29,6 +29,7 @@ func Start_server() {
 
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Recieved an app request")
+		logger.Info("Recived an app reques")
 		proccess_authorization_form(req)
 	}
 
@@ -49,7 +50,7 @@ func Start_server() {
 	handle_event := func(w http.ResponseWriter, req *http.Request){
 		err := event_handler(w, req)
 		if err!=nil{
-			fmt.Println(err)
+			logger.Error(err.Error())
 		}
 	}
 

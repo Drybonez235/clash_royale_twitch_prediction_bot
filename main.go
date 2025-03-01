@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"log"
 	//app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 )
 
 //So at this point I am trying to set up a system that checks to make siure the token is valid. IF it isn't valid, I need to request a new token using a refresh token. Then I am wrtiing
@@ -17,6 +20,10 @@ const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
 const user_id = "29277192"
 
 func main(){
+
+	
+	
+	logger := logger.NewStandardLogger()
 	// var1, err := twitch.Get_display_name("29277192")
 
 	// if err!=nil{panic(err)}
@@ -30,7 +37,7 @@ func main(){
 	test_get_all_access_tokens()
 
 	//test_db()
- 	//server.Start_server()
+ 	server.Start_server(logger)
 	//test_event_sub()
 	//test_app()
 	//test_test_twitch_api()
