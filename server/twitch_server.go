@@ -23,13 +23,13 @@ type Player_tag struct{
 	Player_tag string `json:"clash_id""`
 }
 
-func Start_server(logger *logger.StandardLogger) {
+func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables) {
 	logger.Info("Started server on localhost 3000")
 
 
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
 		logger.Info("Recived an app request")
-		valid, err := process_authorization_form(req)
+		valid, err := process_authorization_form(req, Env_struct)
 
 		if err!=nil{
 			logger.Error(err.Error())
@@ -46,7 +46,7 @@ func Start_server(logger *logger.StandardLogger) {
 
 	subscription_callback := func(w http.ResponseWriter, req *http.Request){
 
-		handled, err  := subscription_handler(req, w)
+		handled, err  := subscription_handler(req, w, Env_struct)
 
 		if err!=nil{
 			w.WriteHeader(http.StatusInternalServerError) 
@@ -61,7 +61,7 @@ func Start_server(logger *logger.StandardLogger) {
 	}
 
 	handle_event := func(w http.ResponseWriter, req *http.Request){
-		err := event_handler(w, req, logger)
+		err := event_handler(w, req, logger, Env_struct)
 		if err!=nil{
 			logger.Error(err.Error())
 		}
@@ -69,11 +69,10 @@ func Start_server(logger *logger.StandardLogger) {
 	}
 
 	verify_player_tag := func(w http.ResponseWriter, req *http.Request){
-		err := handle_verify_player_tag(w, req)
+		err := handle_verify_player_tag(w, req, Env_struct)
 		if err!=nil{
 			logger.Error(err.Error())
 		}
-		fmt.Println("We have been hit")
 	}
 
 
@@ -86,7 +85,7 @@ func Start_server(logger *logger.StandardLogger) {
 	http.ListenAndServe("localhost:3000", nil)
 }
 
-func subscription_handler(req *http.Request, w http.ResponseWriter)(bool,error){
+func subscription_handler(req *http.Request, w http.ResponseWriter, Env_struct logger.Env_variables)(bool,error){
 
 	body, err := io.ReadAll(req.Body)
 	if err!=nil{
@@ -104,7 +103,7 @@ func subscription_handler(req *http.Request, w http.ResponseWriter)(bool,error){
 }
 
 
-func process_authorization_form(req *http.Request)(bool, error){
+func process_authorization_form(req *http.Request, Env_struct logger.Env_variables)(bool, error){
 	fmt.Println("Proccessed auth form")
 	
 	var response Authorization_JSON
@@ -120,7 +119,7 @@ func process_authorization_form(req *http.Request)(bool, error){
 	response.state = req.FormValue("state")
 	response.code = req.FormValue("code")
 
-	valid, err := sqlite.Check_state_nonce(response.state, "state")
+	valid, player_tag ,err := sqlite.Check_state_nonce(response.state, "state")
 
 	if err !=nil {
 		return false, err
@@ -130,7 +129,12 @@ func process_authorization_form(req *http.Request)(bool, error){
 		return false, nil
 	}
 
-	err = twitch_api.Request_user_oath_token(response.code)
+	if player_tag == ""{
+		err = errors.New("player tag associated with state was blank")
+		return false,err
+	}
+
+	err = twitch_api.Request_user_oath_token(response.code, player_tag)
 
 	if err!=nil{
 		return false, err
@@ -139,7 +143,7 @@ func process_authorization_form(req *http.Request)(bool, error){
    return true, nil
 }
 
-func event_handler(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger)(error){
+func event_handler(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger, Env_struct logger.Env_variables)(error){
 	err := Handle_event(w, req, logger)
 
 	if err!=nil{
@@ -157,7 +161,7 @@ func verfify_tokens()(error){
 	return nil
 }
 
-func handle_verify_player_tag(w http.ResponseWriter, req *http.Request)(error){
+func handle_verify_player_tag(w http.ResponseWriter, req *http.Request, Env_struct logger.Env_variables)(error){
 
 	if req.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -188,19 +192,19 @@ func handle_verify_player_tag(w http.ResponseWriter, req *http.Request)(error){
 	if err!=nil{return nil}
 
 	if true_false{
-		w.Write([]byte(`{"valid":true}`))
+		authorize_app_url, nonce, err := twitch_api.Generate_authorize_app_url(App_id, "prediction")
+		if err!=nil{return err}
+
+		err = sqlite.Update_nonce(nonce, string_player_tag.Player_tag)
+
+		if err!=nil{return err}
+
+		json_string := fmt.Sprintf(`{"valid":true,"URL":"%s"}`, authorize_app_url)
+		w.Write([]byte(json_string))
 	} else {	
 		w.Write([]byte(`{"valid":false}`))
 	}
 	return nil
 }
 
-func handlePreflight(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Max-Age", "3600")
-	w.WriteHeader(http.StatusNoContent)
-}
  

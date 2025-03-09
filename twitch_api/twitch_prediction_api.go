@@ -9,8 +9,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
 	//"strings"
 
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
@@ -64,7 +66,7 @@ type Outcome struct {
 	Title string `json:"title"`
 }
 
-func Start_prediction(twitch_user sqlite.Twitch_user) error {
+func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_variables) error {
 	fmt.Println("Start of prediction functiom")
 
 	//Here we are calling the varify function and passing it all the info it needs. You will need a few if statments if it faisls
@@ -84,14 +86,14 @@ func Start_prediction(twitch_user sqlite.Twitch_user) error {
 	// }
 	prediction_json := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", twitch_prediction_uri, bytes.NewBuffer(prediction_json))
+	req, err := http.NewRequest("POST", Env_struct.PREDICTION_URI, bytes.NewBuffer(prediction_json))
 	if err!=nil{
 		err = errors.New("there was a problem forming the request")
 		return err
 	}
 	bearer := "Bearer " + twitch_user.Access_token
 	req.Header.Set("Authorization", bearer)
-	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Client-Id", Env_struct.APP_ID)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil{
@@ -137,7 +139,7 @@ func prediction_body(sub string, display_name string) ([]byte){
 }
 
 //THis is a new untested function... Need to make sure it works. It is called to see if we need to make a new prediction OR wait.
-func Check_prediction(sub string, bearer string, prediction_id string)(string, error){
+func Check_prediction(sub string, bearer string, prediction_id string, Env_struct logger.Env_variables)(string, error){
 	fmt.Println("CHeck Prediction fired")
 
 	fmt.Println("Check Prediction sub: " + sub)
@@ -154,7 +156,7 @@ func Check_prediction(sub string, bearer string, prediction_id string)(string, e
 
 	url_encoded_string := url_quary.Encode()
 
-	check_prediction_url := twitch_prediction_uri +"?"+url_encoded_string
+	check_prediction_url := Env_struct.PREDICTION_URI +"?"+url_encoded_string
 
 	fmt.Println(check_prediction_url)
 
@@ -167,7 +169,7 @@ func Check_prediction(sub string, bearer string, prediction_id string)(string, e
 	bearer_string := "Bearer "+ bearer
 
 	req.Header.Set("Authorization", bearer_string)
-	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Client-Id", Env_struct.APP_ID)
 
 	resp, err := client.Do(req)
 
@@ -216,7 +218,7 @@ func Check_prediction(sub string, bearer string, prediction_id string)(string, e
 	}
 }
 
-func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string) error{
+func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables) error{
 
 	if prediction_id == "" || outcome_id == ""{
 		err := errors.New("prediction or outcome id was blank")
@@ -234,19 +236,16 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON: %v", err)
 	}
-	req, err := http.NewRequest("PATCH", twitch_prediction_uri, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("PATCH", Env_struct.PREDICTION_URI, bytes.NewBuffer(jsonData))
 	if err!=nil{
 		return err
 	}
 	bearer_string := "Bearer "+ bearer_token
 	req.Header.Set("Authorization",bearer_string)
-	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Client-Id", Env_struct.APP_ID)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err!=nil || resp.StatusCode != http.StatusOK{
-		fmt.Println("This is causing the problem")
-		fmt.Println(resp.Status)
-		fmt.Println(resp.Header)
 		return err
 	}
 	body, err := io.ReadAll(resp.Body)
@@ -263,7 +262,7 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	return nil
 }
 
-func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token string)(error){
+func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables)(error){
 	fmt.Println("Cancel prediction fired")
 	if prediction_id == "" {
 		err := errors.New("prediction id was blank")
@@ -281,13 +280,13 @@ func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token
 	if err != nil {
 		return fmt.Errorf("failed to marshal JSON: %v", err)
 	}
-	req, err := http.NewRequest("PATCH", twitch_prediction_uri, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("PATCH", Env_struct.PREDICTION_URI, bytes.NewBuffer(jsonData))
 	if err!=nil{
 		return err
 	}
 	bearer_string := "Bearer "+ bearer_token
 	req.Header.Set("Authorization",bearer_string)
-	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Client-Id", Env_struct.APP_ID)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err!=nil || resp.StatusCode != http.StatusOK{

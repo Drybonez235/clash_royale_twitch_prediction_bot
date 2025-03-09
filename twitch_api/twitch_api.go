@@ -6,18 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	
+
 	"net/http"
 	"net/url"
 	"strings"
 
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
-
-const App_id = "b2109dc3a41733acaa7b3fa355df4c"
-const Secret = "dacb3721ea3023f1e955a053d91f24"//Test secret
-
-const redirect_uri = "http://localhost:3000/redirect"
 
 type access_token_response_json struct {
 	Access_token string `json:"access_token"`
@@ -66,19 +62,18 @@ type Refresh_token_response struct{
 	Token_type string `json:"token_type"`
 }
 
-func Request_user_oath_token(code string) (error) {
+func Request_user_oath_token(code string, player_tag string, Env_struct logger.Env_variables) (error) {
 	fmt.Println("Request_user_oath_token ran")
 	//twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
-	twitch_oath_url := "http://localhost:8080/auth/authorize"
 	url_quary := url.Values{}
-	url_quary.Set("client_id", App_id)
-	url_quary.Set("client_secret", Secret)
+	url_quary.Set("client_id", Env_struct.APP_ID)
+	url_quary.Set("client_secret", Env_struct.APP_SECRET)
 	url_quary.Set("grant_type", "authorization_code")
 	url_quary.Set("code", code)
-	url_quary.Set("redirect_uri", redirect_uri)
+	url_quary.Set("redirect_uri", Env_struct.ROYALE_BETS_URL+"/redirect")
 	url_encoded_string := url_quary.Encode()
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", twitch_oath_url, strings.NewReader(url_encoded_string))
+	req, err := http.NewRequest("POST", Env_struct.OAUTH_REFRESH_TOKEN_URI, strings.NewReader(url_encoded_string))
 	if err != nil {
 		err = errors.New("there was something wrong with the POST request")
 		return err
@@ -102,20 +97,20 @@ func Request_user_oath_token(code string) (error) {
 		err = errors.New("there was something wrong with the json response")
 		return err	
 	}
-	err = Get_claims(new_user.Access_token, new_user)
+	err = Get_claims(new_user.Access_token, new_user, player_tag)
 	if err != nil{
 		return err
 	}
 	return err
 }
 
-func Get_claims(oauth_token string, new_user access_token_response_json) (error){
+//Get claims takes an oath token from a twitch streamer oath response and then gets the claims associated with that token. It also relays the player tag associated with state used to verify the oath request.
+func Get_claims(oauth_token string, new_user access_token_response_json, player_tag string, Env_struct logger.Env_variables) (error){
 	fmt.Println("Get claims ran")
 	//twitch_verifiy_user_endpoint := "https://id.twitch.tv/oauth2/userinfo"
-	twitch_verifiy_user_endpoint := "http://localhost:8080/mock/userinfo"
 	bearer_token := "Bearer " + oauth_token
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", twitch_verifiy_user_endpoint, nil)
+	req, err := http.NewRequest("GET", Env_struct.OAUTH_CLAIMS_INFO_URI, nil)
 	req.Header.Add("Authorization", bearer_token)
 	req.Header.Add("Content-Type", "application/json")
 	if err != nil{
@@ -142,37 +137,35 @@ func Get_claims(oauth_token string, new_user access_token_response_json) (error)
 		err = errors.New("there was something wrong with the json response")
 		return err	
 	}
-	// display_name, err := Get_display_name(claims_json.Sub)
-	display_name := "Mock API Client"
-	// if err!=nil{
-	// 	return err
-	// }
+	display_name, err := Get_display_name(claims_json.Sub, Env_struct)
+	if err!=nil{
+		return err
+	}
 	unpacked_scope, err := Scope_unpacker(new_user.Scope)
 	if err != nil{
 		return err
 	}
 //Scope is an array of strings. We need it to be a regular array.
 	err = sqlite.Write_twitch_info(claims_json.Sub, display_name, new_user.Access_token, new_user.Refresh_token, unpacked_scope, new_user.Token_type,
-		claims_json.Aud, claims_json.Aud, claims_json.Exp, claims_json.Iat, claims_json.Iss, 0, "")
+		claims_json.Aud, claims_json.Aud, claims_json.Exp, claims_json.Iat, claims_json.Iss, 0, player_tag)
 	return err
 }
 
-func Get_display_name(streamer_id string) (string, error) {	
+func Get_display_name(streamer_id string, Env_struct logger.Env_variables) (string, error) {	
 	app_oath_token, err := request_app_oath_token()
 	if err != nil{
 		return "", err
 	}
 	//twitch_get_user_endpoint := "https://api.twitch.tv/helix/users?"
-	twitch_get_user_endpoint := "'http://localhost:8080/mock/users"
 	bearer_token := "Bearer " + app_oath_token
 	url_quary := url.Values{}
 	url_quary.Set("id", streamer_id)
 	url_encoded_string := url_quary.Encode()
-	get_call := twitch_get_user_endpoint + url_encoded_string
+	get_call :=  Env_struct.USER_INFO_URI + url_encoded_string
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", get_call, nil)
 	req.Header.Add("Authorization", bearer_token)
-	req.Header.Add("Client-Id", App_id)
+	req.Header.Add("Client-Id", Env_struct.APP_ID)
 	if err != nil{
 		err = errors.New("there was something wrong with the GET request")
 		return "", err	
@@ -201,17 +194,16 @@ func Get_display_name(streamer_id string) (string, error) {
 	return data[0].DisplayName, nil
 }
 
-func request_app_oath_token() (string, error) {
+func request_app_oath_token(Env_struct logger.Env_variables) (string, error) {
 	fmt.Println("Request app _oath_token ran")
 	//twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
-	twitch_oath_url := "http://localhost:8080/units/clients?"
 	url_quary := url.Values{}
-	url_quary.Set("client_id", App_id)
-	url_quary.Set("client_secret", Secret)
+	url_quary.Set("client_id", Env_struct.APP_ID)
+	url_quary.Set("client_secret", Env_struct.APP_SECRET)
 	url_quary.Set("grant_type", "client_credentials")
 	url_encoded_string := url_quary.Encode()
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", twitch_oath_url, strings.NewReader(url_encoded_string))
+	req, err := http.NewRequest("POST", Env_struct.OAUTH_REFRESH_TOKEN_URI, strings.NewReader(url_encoded_string))
 	if err != nil {
 		err = errors.New("there was something wrong with the POST request")
 		return "" ,err
@@ -234,19 +226,18 @@ func request_app_oath_token() (string, error) {
 		err = errors.New("there was something wrong with the json response")
 		return "", err	
 	}
-	return app_oauth_token_json.Access_token, err
+	return app_oauth_token_json.Access_token, nil
 }
 
-func Refresh_token(refresh_token string, user_id string) (bool, error){
-	refresh_token_url := "https://id.twitch.tv/oauth2/token"
+func Refresh_token(refresh_token string, user_id string, Env_struct logger.Env_variables) (bool, error){
 	client := &http.Client{}
 	url_quary := url.Values{}
-	url_quary.Set("client_id", App_id)
-	url_quary.Set("client_secret", Secret)
+	url_quary.Set("client_id", Env_struct.APP_ID)
+	url_quary.Set("client_secret", Env_struct.APP_SECRET)
 	url_quary.Set("grant_type", "refresh_token")
 	url_quary.Set("refresh_token", refresh_token)
 	url_encoded_string := url_quary.Encode()
-	req, err := http.NewRequest("POST", refresh_token_url, strings.NewReader(url_encoded_string)) 
+	req, err := http.NewRequest("POST", Env_struct.OAUTH_REFRESH_TOKEN_URI, strings.NewReader(url_encoded_string)) 
 	if err!=nil{
 		fmt.Println(err)
 		return false, err
@@ -272,13 +263,13 @@ func Refresh_token(refresh_token string, user_id string) (bool, error){
 	return true, nil
 }
 
-func Test_request_user_oath_token(user_id string) (error) {
+func Test_request_user_oath_token(user_id string, Env_struct logger.Env_variables) (error) {
 	fmt.Println("TEST Request_user_oath_token ran")
 	//twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
 	twitch_oath_url := "http://localhost:8080/auth/authorize"
 	url_quary := url.Values{}
-	url_quary.Set("client_id", App_id)
-	url_quary.Set("client_secret", Secret)
+	url_quary.Set("client_id", Env_struct.APP_ID)
+	url_quary.Set("client_secret", Env_struct.APP_SECRET)
 	url_quary.Set("grant_type", "user_token")
 	url_quary.Set("user_id", user_id)
 	url_quary.Set("scope", "channel:manage:predictions") //openid") openid

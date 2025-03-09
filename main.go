@@ -3,36 +3,21 @@ package main
 import (
 	"fmt"
 	//app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
-	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
+	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 )
 
-//So at this point I am trying to set up a system that checks to make siure the token is valid. IF it isn't valid, I need to request a new token using a refresh token. Then I am wrtiing
-//To the db the new access token and refresh token. Something somewhere is breaking.
-
-const App_id ="b2109dc3a41733acaa7b3fa355df4c" //Test app id
-const Secret = "dacb3721ea3023f1e955a053d91f24" //Test secret
-const user_id = "29277192"
-
 func main(){
-	
-	logger := logger.NewStandardLogger()
-	// var1, err := twitch.Get_display_name("29277192")
 
-	// if err!=nil{panic(err)}
-	// fmt.Println(var1)
-
-	var2, err := clash.String_time_to_time_time("20240101T0202002Z")
+	Env_struct, err := logger.Get_env_variables("/Users/jonathanlewis/Documents/Projects/clash_royale_twitch_prediction_bot/.env")
 	if err!=nil{panic(err)}
-	fmt.Println(var2)
-		//test_db()
- 	server.Start_server(logger)
-	//test_event_sub()
-	//test_app()
-	//test_test_twitch_api()
+	logger := logger.NewStandardLogger()
+	server.Start_server(logger, Env_struct)
+	
+ 
 }
 
 func test_db(){
@@ -124,14 +109,14 @@ func test_test_twitch_api(){
 // 	}
 // }
 
-func test_event_sub(){
+func test_event_sub(Env_struct logger.Env_variables){
 	user, err := sqlite.Get_twitch_user("sub", user_id)	
 
 	if err!= nil{
 		fmt.Println(err)
 	}
 
-	err = server.Create_EventSub(user, "stream.online")
+	err = server.Create_EventSub(user, "stream.online", Env_struct)
 
 	if err!=nil{
 		fmt.Println(err)

@@ -3,17 +3,15 @@ package server
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
-	"encoding/hex"
+
+	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 )
 
-//This is the secret used. Maybe it needs to be put into a .env file... What is that?
-const secret = "hgosyancbzw840fna92bsjdnas"
-
-
-func verify_event_message(req *http.Request, body []byte)(bool, error){
+func verify_event_message(req *http.Request, body []byte, Env_struct logger.Env_variables)(bool, error){
 
 	fmt.Println("Verify Event Message Fired")
 	crafted_message, err := craft_message(req, body)
@@ -22,7 +20,7 @@ func verify_event_message(req *http.Request, body []byte)(bool, error){
 		return false, err
 	}
 
-	created_hmac := create_hmac_message(crafted_message)
+	created_hmac := create_hmac_message(crafted_message, Env_struct)
 
 	received_message := req.Header.Get("Twitch-Eventsub-Message-Signature")
 
@@ -59,8 +57,8 @@ func craft_message(req *http.Request, body []byte) (string, error){
 	return header_string + header_timestamp + string(body), nil
 }
 
-func create_hmac_message(crafted_message string)( []byte){
-	h := hmac.New(sha256.New, []byte(secret))
+func create_hmac_message(crafted_message string, Env_struct logger.Env_variables)( []byte){
+	h := hmac.New(sha256.New, []byte(Env_struct.ENCRYPTION_SECRET))
 	h.Write([]byte(crafted_message))
 	return h.Sum(nil)
 }

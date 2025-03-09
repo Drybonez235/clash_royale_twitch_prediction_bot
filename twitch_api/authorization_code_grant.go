@@ -4,12 +4,13 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+
 	//"fmt"
 	"net/url"
+
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
-
-//const redirect_uri = "http://localhost:3000"
 
 func Generate_state_nonce(state_nonce string) ( string, error) {
 	randomBytes := make([]byte, 32)
@@ -34,29 +35,29 @@ func Generate_state_nonce(state_nonce string) ( string, error) {
 	return random_string, err
 }
 
-func Generate_authorize_app_url(client_id string, scope_request string)(string, error){
-	url_authorize := "https://id.twitch.tv/oauth2/authorize?"
+//This function generates the url that streamers will use to connect to Twitch. It returns a URL and a nonce, and an error.
+func Generate_authorize_app_url(scope_request string, Env_struct logger.Env_variables)(string, string, error){
 	url_quary := url.Values{}
-	url_quary.Set("client_id", client_id)
+	url_quary.Set("client_id", Env_struct.APP_ID)
 	url_quary.Set("force_verify", "false")
 	url_quary.Set("response_type", "code")
 	scope, err := Scope_requests(scope_request)
 	if err != nil{
-		return "", err
+		return "", "",err
 	}
 	url_quary.Set("scope", scope)
 	state, err := Generate_state_nonce("state")
 	if err != nil{
-		return "", err
+		return "", "", err
 	}
 	url_quary.Set("state", state)
 	nonce, err := Generate_state_nonce("nonce")
 	if err != nil{
-		return "", err
+		return "", "", err
 	}
 	url_quary.Set("nonce", nonce)
 	encoded_url_quary := url_quary.Encode()
-	uri_url_quary := "&redirect_uri=" + redirect_uri + "&"
-	return_url := url_authorize + uri_url_quary + encoded_url_quary
-	return return_url, err
+	uri_url_quary := "&redirect_uri=" + Env_struct.ROYALE_BETS_URL + "/redirect" + "&"
+	return_url := Env_struct.OAUTH_AUTHORIZE_URI + uri_url_quary + encoded_url_quary
+	return return_url, nonce, nil
 }

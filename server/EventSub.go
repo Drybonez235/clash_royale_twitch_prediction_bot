@@ -3,24 +3,16 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"fmt"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger" 
 )
 
-//const sub_uri = "https://api.twitch.tv/helix/eventsub/subscriptions"
-const sub_uri = "http://localhost:8080/eventsub/subscriptions"
-
-//This is the callback that needs to handle the challenge
-const my_website = "http://localhost:3000/subscription_handler"
-const app_secret = "dacb3721ea3023f1e955a053d91f24"
-const App_id ="b2109dc3a41733acaa7b3fa355df4c" //Test app id
-
-func Create_EventSub(user sqlite.Twitch_user, sub_type string)(error){
+func Create_EventSub(user sqlite.Twitch_user, sub_type string, Env_struct logger.Env_variables)(error){
 	client := http.Client{}
 
-	bearer_string := "Bearer " + app_secret 
+	bearer_string := "Bearer " + Env_struct.APP_SECRET
 
 	// url_quary := url.Values{}
 	// url_quary.Set("Authorization", bearer_string)
@@ -30,8 +22,7 @@ func Create_EventSub(user sqlite.Twitch_user, sub_type string)(error){
 
 	// fmt.Println(url_quary)
 
-	req_body, err := create_sub_request_body(user, sub_type)
-
+	req_body, err := create_sub_request_body(user, sub_type, Env_struct)
 
 	if err!=nil{
 		fmt.Println(err)
@@ -39,7 +30,9 @@ func Create_EventSub(user sqlite.Twitch_user, sub_type string)(error){
 	}
 	fmt.Println(string(req_body))
 
-	req, err := http.NewRequest("POST", sub_uri, bytes.NewBuffer(req_body))
+	//Subscription URI info is either "https://api.twitch.tv/helix/eventsub/subscriptions" or "http://localhost:8080/eventsub/subscriptions"
+
+	req, err := http.NewRequest("POST", Env_struct.SUBSCRIPTION_INFO_URI, bytes.NewBuffer(req_body))
 
 	if err!=nil{
 		fmt.Println("err")
@@ -47,7 +40,7 @@ func Create_EventSub(user sqlite.Twitch_user, sub_type string)(error){
 	}
 
 	req.Header.Set("Authorization", bearer_string)
-	req.Header.Set("Client-Id", App_id)
+	req.Header.Set("Client-Id", Env_struct.APP_ID)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
@@ -61,7 +54,7 @@ func Create_EventSub(user sqlite.Twitch_user, sub_type string)(error){
 }
 
 
-func create_sub_request_body(user sqlite.Twitch_user, sub_type string)([]byte, error){
+func create_sub_request_body(user sqlite.Twitch_user, sub_type string, Env_struct logger.Env_variables)([]byte, error){
 	// The sub types for the CLI and the production API are different
 	// 
 	// if sub_type == "stream.online" {
@@ -71,7 +64,7 @@ func create_sub_request_body(user sqlite.Twitch_user, sub_type string)([]byte, e
 	// 	return nil, err	
 	// }
 
-	err := errors.New("No err")
+	callback_string :=  Env_struct.ROYALE_BETS_URL+"/subscription_handler"
 	
 	body := EventSubRequest{
 		Type: sub_type,
@@ -81,7 +74,7 @@ func create_sub_request_body(user sqlite.Twitch_user, sub_type string)([]byte, e
 		},
 		Transport : TransportSubRequest{
 			Method: "webhook",
-			Callback: my_website,
+			Callback: callback_string,
 			Secret: secret},
 		}
 

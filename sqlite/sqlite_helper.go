@@ -3,6 +3,8 @@ package sqlite
 import (
 	"errors"
 	"fmt"
+	//"log"
+
 	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 	"github.com/ncruces/go-sqlite3"
 	_ "github.com/ncruces/go-sqlite3/driver"
@@ -52,7 +54,7 @@ func Create_twitch_database() error {
 
 	defer db.Close()
 
-	err = db.Exec(`CREATE TABLE state (state_value text)`)
+	err = db.Exec(`CREATE TABLE state (state_value text, player_id text)`)
 	if err != nil{
 		err = errors.New("db: there was a problem creating the state table")
 		return err
@@ -117,10 +119,11 @@ func Write_state_nonce(state_nonce string, table string) error {
 	return err
 }
 
-func Check_state_nonce(state_nonce string, table string) (bool, error){
+//This returns the state or nonce that was used to create the secure url and the player tag associated with that session.
+func Check_state_nonce(state_nonce string, table string) (bool, string, error){
 	db, err := open_db()
 	if err!=nil{
-		return  false, err
+		return  false, "", err
 	}
 	header := ""
 
@@ -130,22 +133,23 @@ func Check_state_nonce(state_nonce string, table string) (bool, error){
 		header = "nonce_value"
 	} else {
 		err = errors.New("db: Could not check state or nonce: invalid table name given")
-		return false, err
+		return false, "", err
 	}
 
 	sql_query_string := fmt.Sprintf(`SELECT * FROM '%s' WHERE %s == '%s'`, table, header, state_nonce)
 	sql_query, _, err := db.Prepare(sql_query_string)
 	if err != nil{
-		return false ,err
+		return false,"",err
 	}
-	if sql_query.Step() {
+	for sql_query.Step() {
+		player_tag := sql_query.ColumnText(1)
+
 		sql_query.Close()
 		err = delete_state_nonce(state_nonce, table, db)
-		return true, err
-	} else {
-		sql_query.Close()
-	}
-	return false, err
+		return true, player_tag, nil
+	} 
+	
+	return false,"",err
 }
 
 func delete_state_nonce(state_nonce string, table string, db *sqlite3.Conn) error {
@@ -507,4 +511,15 @@ func Get_all_access_tokens()([]Twitch_user_refresh, error){
 	}
 
 	return Refresh_list, nil
+}
+
+func Update_nonce(nonce string, player_tag string)(error){
+	db, err := open_db()
+	if err!=nil{return err}
+	sql_query_string := fmt.Sprintf(`UPDATE state SET player_id = '%s' WHERE state_value == '%s'`,player_tag, nonce)
+	err = db.Exec(sql_query_string)
+
+	if err!=nil{return err}
+
+	return nil
 }
