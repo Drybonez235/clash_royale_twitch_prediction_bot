@@ -39,6 +39,7 @@ func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+		http.Redirect(w, req, Env_struct.ROYALE_BETS_REDIRECT_URL, http.StatusSeeOther)
 		logger.Info("Registered a user from " + req.URL.String())
 	}
 

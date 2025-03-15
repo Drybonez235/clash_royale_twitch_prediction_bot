@@ -126,7 +126,7 @@ func Request_user_oath_token(code string, player_tag string, Env_struct logger.E
 
 //Gets the claims information assoicated with an OAth token. This is where we get the sub ID.
 //Sends a GET request to https://id.twitch.tv/oauth2/userinfo with the user access token as a Bearer header.
-//Infomration about the Twitch API can be found at: https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#getting-claims-information-from-an-access-token
+//Information about the Twitch API can be found at: https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#getting-claims-information-from-an-access-token
 func Get_claims(oauth_token string, new_user access_token_response_json, player_tag string, Env_struct logger.Env_variables) (error){
 	//twitch_verifiy_user_endpoint := "https://id.twitch.tv/oauth2/userinfo"
 	fmt.Println("Get Claims Ran")
