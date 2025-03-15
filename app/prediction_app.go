@@ -88,7 +88,7 @@ func Watch_prediction(sub string, user sqlite.Twitch_user, Env_struct logger.Env
 			return nil
 		}
 
-		new_battle, err := clash.New_battle(user.Player_tag, t_created_at)
+		new_battle, err := clash.New_battle(user.Player_tag, t_created_at, Env_struct)
 
 		if err!=nil{
 			return err

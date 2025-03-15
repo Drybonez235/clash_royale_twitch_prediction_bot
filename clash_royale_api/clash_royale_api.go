@@ -2,7 +2,6 @@ package clash_royale_api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"errors"
@@ -12,7 +11,6 @@ import (
 const clash_api_url = "https://api.clashroyale.com/v1/players/"
 
 func Get_prior_battles(player_tag string, Env_struct logger.Env_variables)(Match_25, error){
-	fmt.Println("Get prior battles fired")
 	var battle_log Match_25
 
 	player_tag_url := clash_api_url+"%23"+player_tag+"/battlelog"

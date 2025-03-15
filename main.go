@@ -18,7 +18,6 @@ func main() {
 	}
 	logger := logger.NewStandardLogger()
 	server.Start_server(logger, Env_struct)
-
 }
 
 func test_db() {
@@ -94,4 +93,3 @@ func test_test_twitch_api() {
 	// }
 
 }
-

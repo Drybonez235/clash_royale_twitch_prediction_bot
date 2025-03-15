@@ -117,11 +117,9 @@ func process_authorization_form(req *http.Request, Env_struct logger.Env_variabl
 	if err !=nil {
 		return false, err
 	}
-
 	if !valid{
 		return false, nil
 	}
-
 	if player_tag == ""{
 		err = errors.New("FILE twitch_server FUNC: proccess_authorization_form BUG: player_tag was blank")
 		return false,err
