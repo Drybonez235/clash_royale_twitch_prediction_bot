@@ -1,7 +1,6 @@
 package twitch_api
 
 import (
-	//"bytes"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -9,9 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-
-	//"strings"
-
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
@@ -84,11 +80,14 @@ func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_vari
 	// 		return err
 	// 	}
 	// }
-	prediction_json := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
+	prediction_json, err := prediction_body(twitch_user.User_id, twitch_user.Display_Name)
+	if err!=nil{
+		return err
+	}	
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", Env_struct.PREDICTION_URI, bytes.NewBuffer(prediction_json))
 	if err!=nil{
-		err = errors.New("there was a problem forming the request")
+		err = errors.New("FILE: twitch_prediction FUNC: Start_prediction CALL: http.NewRequest " + err.Error())
 		return err
 	}
 	bearer := "Bearer " + twitch_user.Access_token
@@ -97,18 +96,19 @@ func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_vari
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil{
-		fmt.Println(resp.StatusCode)
-		fmt.Println("There was a problem with the response")
+		err = errors.New("FILE: twitch_prediction FUNC: Start_prediction CALL: client.Do " + err.Error())
 		return err
 	}
 	defer resp.Body.Close()
 	var Prediction_data_array Prediction_data_array
 	body, err := io.ReadAll(resp.Body)
 	if err!=nil{
+		err = errors.New("FILE: twitch_prediction FUNC: Start_prediction CALL: io.ReadAll " + err.Error())
 		return err
 	}
 	err = json.Unmarshal(body, &Prediction_data_array)
 	if err != nil{
+		err = errors.New("FILE: twitch_prediction FUNC: Start_prediction CALL: json.Unmarshal " + err.Error())
 		return err
 	}	
 	err = Prediction_response_parser(Prediction_data_array)
@@ -118,7 +118,7 @@ func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_vari
 	return err
 }
 
-func prediction_body(sub string, display_name string) ([]byte){
+func prediction_body(sub string, display_name string) ([]byte, error){
 	prediction_text := fmt.Sprintf(`Will %s win the next game?`, display_name)
 	body := Prediction_body{
 		Broadcaster_id: sub,
@@ -129,40 +129,31 @@ func prediction_body(sub string, display_name string) ([]byte){
 		},
 		Prediction_window: 60,
 	}
-	//body := fmt.Sprintf(`{"broadcaster_id":"%s","title":"%s","outcomes":[{"title":"Yes"},{"title":"No"}],"prediction_window":60}`,sub, prediction_text)
 	jsonData, err := json.Marshal(body)
 	if err != nil {
-		fmt.Println("JSON Unmarshal Error:", err)
+		err = errors.New("FILE: twitch_prediction FUNC: prediction_body CALL: json.Marshal " + err.Error())
+	return jsonData ,err
 	}
-	fmt.Println("Made the prediction body")
-	return jsonData
+	return jsonData, nil
 }
 
 //THis is a new untested function... Need to make sure it works. It is called to see if we need to make a new prediction OR wait.
 func Check_prediction(sub string, bearer string, prediction_id string, Env_struct logger.Env_variables)(string, error){
-	fmt.Println("CHeck Prediction fired")
 
-	fmt.Println("Check Prediction sub: " + sub)
 	client := &http.Client{}
-
 	url_quary := url.Values{}
 	url_quary.Set("broadcaster_id", sub)
 	url_quary.Set("first", "0")
-
 	//If there is an active prediction in my DB, we will search for it here. If not, we don't set the id.
 	if prediction_id != ""{
 		url_quary.Set("id", prediction_id)
 	}
-
 	url_encoded_string := url_quary.Encode()
-
 	check_prediction_url := Env_struct.PREDICTION_URI +"?"+url_encoded_string
-
-	fmt.Println(check_prediction_url)
-
 	req, err := http.NewRequest("GET", check_prediction_url, nil)// twitch_prediction_uri ,strings.NewReader(url_encoded_string))
 
 	if err!=nil{
+		err = errors.New("FILE: twitch_prediction FUNC: Check_prediction CALL: http.NewRequest " + err.Error())
 		return "", err
 	}
 
@@ -173,15 +164,20 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 
 	resp, err := client.Do(req)
 
-	if err!=nil || resp.StatusCode != http.StatusOK{
-		fmt.Println("This is the problem")
-		fmt.Println(resp.Status)
+	if err!=nil {
+		err = errors.New("FILE: twitch_prediction FUNC: Check_prediction CALL: client.Do " + err.Error())
 		return "", err
-	}	
+	}
+	
+	if resp.StatusCode != http.StatusOK{
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do " + resp.Status)
+		return "", err
+	}
 
 	body, err := io.ReadAll(resp.Body)
 
 	if err!=nil{
+		err = errors.New("FILE: twitch_prediction FUNC: Check_prediction CALL: io.ReadAll " + err.Error())
 		return "", err
 	}
 
@@ -190,15 +186,12 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	err = json.Unmarshal(body, &prediction_body)
 
 	if err!=nil{
+		err = errors.New("FILE: twitch_prediction FUNC: Check_prediction CALL: json.Unmarshal " + err.Error())
 		return "", err
 	}
-	fmt.Println(prediction_body.Data[0])
 
 	if prediction_body.Data[0].Status == "ACTIVE" || prediction_body.Data[0].Status == "LOCKED"{
 		current_prediction, _, err := sqlite.Get_predictions(sub, "ACTIVE")
-
-		fmt.Println(current_prediction)
-		fmt.Println(prediction_body.Data[0].Id)
 
 		if err!=nil{
 			return "", err
@@ -221,7 +214,7 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables) error{
 
 	if prediction_id == "" || outcome_id == ""{
-		err := errors.New("prediction or outcome id was blank")
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction BUG: prediction_id or outcome_id was blank")
 		return err
 	}
 
@@ -234,10 +227,12 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	}
 	jsonData, err := json.Marshal(requestBody)
 	if err != nil {
-		return fmt.Errorf("failed to marshal JSON: %v", err)
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: json.Marshal" + err.Error())
+		return err
 	}
 	req, err := http.NewRequest("PATCH", Env_struct.PREDICTION_URI, bytes.NewBuffer(jsonData))
 	if err!=nil{
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: http.NewRequest" + err.Error())
 		return err
 	}
 	bearer_string := "Bearer "+ bearer_token
@@ -245,16 +240,22 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	req.Header.Set("Client-Id", Env_struct.APP_ID)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
-	if err!=nil || resp.StatusCode != http.StatusOK{
+	if err!=nil {
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do" + err.Error())
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK{
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do " + resp.Status)
 		return err
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err!=nil{
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: io.ReadAll" + err.Error())
 		return err
 	}
 	var json_message map[string]interface{} 
 	json.Unmarshal(body, &json_message)
-	fmt.Println("We closed the prediction")
 	err = sqlite.Delete_prediction_id(broadcaster_id)
 	if err !=nil{
 		return err
@@ -263,9 +264,8 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 }
 
 func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables)(error){
-	fmt.Println("Cancel prediction fired")
 	if prediction_id == "" {
-		err := errors.New("prediction id was blank")
+		err := errors.New("FILE: twitch_prediction FUNC: Cancel_prediction BUG: prediction_id was blank")
 		return err
 	}
 
@@ -278,10 +278,12 @@ func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token
 	}
 	jsonData, err := json.Marshal(requestBody)
 	if err != nil {
-		return fmt.Errorf("failed to marshal JSON: %v", err)
+		err = errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: json.Marshal" + err.Error())
+		return err
 	}
 	req, err := http.NewRequest("PATCH", Env_struct.PREDICTION_URI, bytes.NewBuffer(jsonData))
 	if err!=nil{
+		err = errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: http.NewRequest" + err.Error())
 		return err
 	}
 	bearer_string := "Bearer "+ bearer_token
@@ -289,19 +291,22 @@ func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token
 	req.Header.Set("Client-Id", Env_struct.APP_ID)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
-	if err!=nil || resp.StatusCode != http.StatusOK{
-		fmt.Println("This is causing the problem")
-		fmt.Println(resp.Status)
-		fmt.Println(resp.Header)
+	if err!=nil {
+		err = errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do" + err.Error())
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK{
+		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do " + resp.Status)
 		return err
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err!=nil{
+		err = errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: io.ReadAll" + err.Error())
 		return err
 	}
 	var json_message map[string]interface{} 
 	json.Unmarshal(body, &json_message)
-	fmt.Println("We canceled the prediction")
 	err = sqlite.Delete_prediction_id(broadcaster_id)
 	if err !=nil{
 		return err

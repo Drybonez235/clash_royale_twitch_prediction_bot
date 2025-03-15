@@ -12,7 +12,7 @@ import (
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 	
-func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger)(error){
+func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger, Env_struct logger.Env_variables)(error){
 	var webhook_struct WebhookNotification
 
 	req_body, err := io.ReadAll(req.Body)
@@ -20,10 +20,9 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 	if err!=nil{
 		return err
 	}
-
 	err = json.Unmarshal(req_body, &webhook_struct)
-
 	if err!=nil{
+		err = errors.New("FILE event_handler FUNC: Handle_event CALL: json.Unmarshal " + err.Error())
 		return err
 	}
 
@@ -44,13 +43,13 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 		
 		if webhook_struct.Subscription.Type == "stream.online"{
 			logger.Info("stream online for: " + webhook_struct.Event.BroadcasterUserLogin)
-			err = stream_start(webhook_struct.Event.BroadcasterUserID)
+			err = stream_start(webhook_struct.Event.BroadcasterUserID, Env_struct)
 			if err!=nil{
 				return err
 			}
 		} else if webhook_struct.Subscription.Type == "stream.offline"{
 			logger.Info("stream offline for: " + webhook_struct.Event.BroadcasterUserLogin)
-			err = stream_end(webhook_struct.Event.BroadcasterUserID)
+			err = stream_end(webhook_struct.Event.BroadcasterUserID, Env_struct)
 			if err!=nil{
 				return err
 			}
@@ -59,17 +58,18 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 	return nil
 }
 
-func stream_start(streamer_id string)(error){
+func stream_start(streamer_id string, Env_struct logger.Env_variables)(error){
 
 	if streamer_id == ""{
-		return errors.New("stream start: streamer id was blank")
+		err := errors.New("FILE event_handler FUNC: stream_start BUG: streamer_id was blank")
+		return err
 	}
 	user, err := sqlite.Get_twitch_user("sub", streamer_id)
 
 	if err!=nil{return err}
 
 	if user.User_id == ""{
-		err = errors.New("stream start: streamer not found in db")
+		err := errors.New("FILE event_handler FUNC: stream_start BUG: user.User_id was blank")
 		return err
 	}
 
@@ -79,16 +79,16 @@ func stream_start(streamer_id string)(error){
 		return err
 	}
 
-	go app.Start_prediction_app(user.User_id)
+	go app.Start_prediction_app(user.User_id, Env_struct)
 
 	return nil
 }
 
-func stream_end(streamer_id string)(error){
+func stream_end(streamer_id string, Env_struct logger.Env_variables)(error){
 	var err error
 
 	if streamer_id == ""{
-		err = errors.New("stream end: streamer id was blank")
+		err := errors.New("FILE event_handler FUNC: stream_start BUG: streamer_id was blank")
 		return err
 	}
 
@@ -101,7 +101,7 @@ func stream_end(streamer_id string)(error){
 	if err!=nil{return err}
 
 	if user.User_id == ""{
-		err = errors.New("stream end: streamer not found in db")
+		err := errors.New("FILE event_handler FUNC: stream_end BUG: user.User_id was blank")
 		return err
 	}
 
@@ -116,7 +116,7 @@ func stream_end(streamer_id string)(error){
 		return nil
 	}
 
-	err = twitch_api.Cancel_prediction(prediction_id, streamer_id, user.Access_token)
+	err = twitch_api.Cancel_prediction(prediction_id, streamer_id, user.Access_token, Env_struct)
 
 	if err!=nil{return err}
 

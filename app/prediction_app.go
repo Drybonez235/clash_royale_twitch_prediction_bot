@@ -3,19 +3,17 @@ package app
 import (
 	"fmt"
 	"time"
-
+	"errors"
 	clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	sqlite "github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
 )
 
-func Start_prediction_app(sub string) error {
-	fmt.Println("Started the prediction app.")
-	
+func Start_prediction_app(sub string, Env_struct logger.Env_variables) error {
 	user, err := sqlite.Get_twitch_user("sub", sub)
-	fmt.Println(sub)
 	if err!=nil{
-		panic(err)
+		return err
 	}
 
 	stream, err := sqlite.Twitch_user_online(sub)
@@ -27,43 +25,35 @@ func Start_prediction_app(sub string) error {
 
 	for stream {
 		//We have to check to see if there is an active prediction here that was set by me. IF it was not set by me, then we need to wait.
-	prediction_id, _, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
+		prediction_id, _, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
 
 	//The problem is that I check my db to see if there are any active predictions. Right now there is not.
 	//However, when I check tw
 
-	if err!=nil{
-		return err
-	}
-		own_active_prediction, err := twitch.Check_prediction(sub, user.Access_token, prediction_id)
-		fmt.Println(own_active_prediction)
+		if err!=nil{return err}
+		own_active_prediction, err := twitch.Check_prediction(sub, user.Access_token, prediction_id, Env_struct)
 		if err!= nil{
 			return err
 		}
 
 		 if own_active_prediction == "our_prediction" {
-			fmt.Println("Our prediction")
-			err = Watch_prediction(sub, user)
-
+			err = Watch_prediction(sub, user, Env_struct)
 			if err!=nil{
 				return err
 			}
 
 		 }else if own_active_prediction == "no_active_prediction"{
-			fmt.Println("prediction started")
-			err = twitch.Start_prediction(user)
-
+			err = twitch.Start_prediction(user, Env_struct)
 			if err!=nil{
-				panic(err)
+				return err
 			}
 		} else if own_active_prediction == "not_our_prediction" {
-			fmt.Println("Not our prediction")
 			time.Sleep(30 * time.Second)
+		} else {
+			err = errors.New("FILE: prediction_app FUNC: Start_prediction_app BUG: own_active_prediction invalid")
+			return err
 		} 
 
-		if err!=nil{
-			return err
-		}
 		stream, err = sqlite.Twitch_user_online(sub)
 
 		if err!=nil{
@@ -75,32 +65,25 @@ func Start_prediction_app(sub string) error {
 }
 
 //IF we own the prediction then this function will fire.
-func Watch_prediction(sub string, user sqlite.Twitch_user)error{
-
-	prediction_id, created_at ,err := sqlite.Get_predictions(sub, "ACTIVE")
-
-	if err!=nil{
-		return err
-	}
-
+func Watch_prediction(sub string, user sqlite.Twitch_user, Env_struct logger.Env_variables)error{
+	prediction_id, created_at, err := sqlite.Get_predictions(sub, "ACTIVE")
+	if err!=nil{return err}
 	if prediction_id == ""{
+		err = errors.New("FILE: prediction_app FUNC: Watch_prediction BUG: prediction_id was blank")
 		return err
 	}
 
 	t_created_at, err := time.Parse(time.RFC3339, created_at)
 
 	if err!=nil{
-		panic(err)
+		err = errors.New("FILE: prediction_app FUNC Watch_prediction CALL: time.Parse " + err.Error())
+		return err
 	}
-
 	new_battle := "no_new_battles"
-
 	for (new_battle == "no_new_battles"){
 
 		user, err := sqlite.Get_twitch_user("sub", sub)
-
 		if err!=nil{return err}
-
 		if user.Online != 1{
 			return nil
 		}
@@ -112,18 +95,17 @@ func Watch_prediction(sub string, user sqlite.Twitch_user)error{
 		}
 
 		if new_battle == "no_new_battles"{
-			fmt.Println("no new battles")
 			time.Sleep(30 * time.Second)
 		} else if new_battle == "win"{
-			fmt.Println("Battle win")	
 			outcome_id, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
 			if err!=nil{
 				return err
 			}
 			if outcome_id == ""{
-				fmt.Println("Outcome id was blanck")
+				err = errors.New("FILE: prediction_app FUNC: Watch_prediction BUG: outcome_id was blank")
+				return err
 			}
-			err = twitch.End_prediction(prediction_id, outcome_id, user.User_id, user.Access_token)
+			err = twitch.End_prediction(prediction_id, outcome_id, user.User_id, user.Access_token, Env_struct)
 			if err !=nil{
 				return err
 			}
@@ -135,9 +117,10 @@ func Watch_prediction(sub string, user sqlite.Twitch_user)error{
 				return err
 			}
 			if outcome_id == ""{
-				fmt.Println("Outcome id was blanck")
+				err = errors.New("FILE: prediction_app FUNC: Watch_prediction BUG: outcome_id was blank")
+				return err
 			}
-			err = twitch.End_prediction(prediction_id, outcome_id, user.User_id, user.Access_token)
+			err = twitch.End_prediction(prediction_id, outcome_id, user.User_id, user.Access_token, Env_struct)
 			if err !=nil{
 				return err
 			}

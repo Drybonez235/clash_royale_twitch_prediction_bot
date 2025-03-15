@@ -26,7 +26,6 @@ type Player_tag struct{
 func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables) {
 	logger.Info("Started server on localhost 3000")
 
-
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
 		logger.Info("Recived an app request")
 		valid, err := process_authorization_form(req, Env_struct)
@@ -40,7 +39,6 @@ func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-
 		logger.Info("Registered a user from " + req.URL.String())
 	}
 
@@ -75,13 +73,11 @@ func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables
 		}
 	}
 
-
 	http.HandleFunc("/redirect", redirect_uri)
 	http.HandleFunc("/subscription_handler", subscription_callback)
 	http.HandleFunc("/receive_twitch_event", handle_event)
 	http.HandleFunc("/verify_player_tag", verify_player_tag)
 	
-
 	http.ListenAndServe("localhost:3000", nil)
 }
 
@@ -89,14 +85,15 @@ func subscription_handler(req *http.Request, w http.ResponseWriter, Env_struct l
 
 	body, err := io.ReadAll(req.Body)
 	if err!=nil{
+		err = errors.New("FILE twitch_server FUNC: subscription_hadnler CALL: io.ReadALl " + err.Error())
 		return false, err
 	}
-	valid, err := verify_event_message(req, body)
+	valid, err := verify_event_message(req, body, Env_struct)
 	if err!=nil{
 		return false, err
 	}
 	if !valid{
-		return false, err
+		return false, nil
 	}
 	respond_challenge(w, body)
 	return true, nil
@@ -104,14 +101,10 @@ func subscription_handler(req *http.Request, w http.ResponseWriter, Env_struct l
 
 
 func process_authorization_form(req *http.Request, Env_struct logger.Env_variables)(bool, error){
-	fmt.Println("Proccessed auth form")
-	
 	var response Authorization_JSON
-
 	err := req.ParseForm()
-
 	if err != nil{
-		err = errors.New("problem reading authorization form values")
+		err = errors.New("FILE: twitch_server FUNC: proccess_authorization_form CALL: req.ParseForm() "+ err.Error())
 		return false, err
 	}
 
@@ -119,7 +112,7 @@ func process_authorization_form(req *http.Request, Env_struct logger.Env_variabl
 	response.state = req.FormValue("state")
 	response.code = req.FormValue("code")
 
-	valid, player_tag ,err := sqlite.Check_state_nonce(response.state, "state")
+	valid, player_tag, err := sqlite.Check_state_nonce(response.state, "state")
 
 	if err !=nil {
 		return false, err
@@ -130,11 +123,11 @@ func process_authorization_form(req *http.Request, Env_struct logger.Env_variabl
 	}
 
 	if player_tag == ""{
-		err = errors.New("player tag associated with state was blank")
+		err = errors.New("FILE twitch_server FUNC: proccess_authorization_form BUG: player_tag was blank")
 		return false,err
 	}
 
-	err = twitch_api.Request_user_oath_token(response.code, player_tag)
+	err = twitch_api.Request_user_oath_token(response.code, player_tag, Env_struct)
 
 	if err!=nil{
 		return false, err
@@ -144,7 +137,7 @@ func process_authorization_form(req *http.Request, Env_struct logger.Env_variabl
 }
 
 func event_handler(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger, Env_struct logger.Env_variables)(error){
-	err := Handle_event(w, req, logger)
+	err := Handle_event(w, req, logger, Env_struct)
 
 	if err!=nil{
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -153,13 +146,13 @@ func event_handler(w http.ResponseWriter, req *http.Request, logger *logger.Stan
 	return nil
 }
 
-func verfify_tokens()(error){
-	err := Validate_all_tokens()
-	if err!=nil{
-		return err
-	}
-	return nil
-}
+// func verfify_tokens()(error){
+// 	err := Validate_all_tokens(logger)
+// 	if err!=nil{
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func handle_verify_player_tag(w http.ResponseWriter, req *http.Request, Env_struct logger.Env_variables)(error){
 
@@ -177,6 +170,7 @@ func handle_verify_player_tag(w http.ResponseWriter, req *http.Request, Env_stru
 
 	body, err := io.ReadAll(req.Body)
 	if err!=nil{
+		err = errors.New("FILE twitch_server FUNC: handle_verify_player_tag CALL: io.ReadAll " + err.Error())
 		return err}
 
 	var string_player_tag Player_tag
@@ -184,18 +178,19 @@ func handle_verify_player_tag(w http.ResponseWriter, req *http.Request, Env_stru
 	err = json.Unmarshal(body, &string_player_tag)
 
 	if err!=nil{
+		err = errors.New("FILE twitch_server FUNC: handle_verify_player_tag CALL: json.Unmarshal " + err.Error())
 		return err
 	}
 
-	true_false, err := clash.Validate_user_id(string_player_tag.Player_tag)
+	true_false, err := clash.Validate_user_id(string_player_tag.Player_tag, Env_struct)
 
 	if err!=nil{return nil}
 
 	if true_false{
-		authorize_app_url, nonce, err := twitch_api.Generate_authorize_app_url(App_id, "prediction")
+		authorize_app_url, state, err := twitch_api.Generate_authorize_app_url("prediction", Env_struct)
 		if err!=nil{return err}
 
-		err = sqlite.Update_nonce(nonce, string_player_tag.Player_tag)
+		err = sqlite.Update_state(state, string_player_tag.Player_tag)
 
 		if err!=nil{return err}
 

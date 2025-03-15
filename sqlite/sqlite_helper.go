@@ -38,7 +38,7 @@ type Twitch_user_refresh struct{
 func open_db()(*sqlite3.Conn, error){
 	db, err := sqlite3.Open(file) 
 	if err != nil {
-		err = errors.New("db: there was a problem opening the database file")
+		err = errors.New("FILE sqlite_helper FUNC: open_db CALL: sqlite3.Open " + err.Error())
 		return db, err
 	}	
 	return db, nil
@@ -103,7 +103,7 @@ func Write_state_nonce(state_nonce string, table string) error {
 	} else if table == "nonce" {
 		header = "nonce_value"
 	} else {
-		err = errors.New("invalid table given")
+		err = errors.New("FILE: sqlite_helper FUNC: Write_state_nonce INVALID PARAMETER: Must be state or nonce")
 	}
 
 	if err != nil{
@@ -113,10 +113,15 @@ func Write_state_nonce(state_nonce string, table string) error {
 	sql_command := fmt.Sprintf(`INSERT INTO '%s' ('%s') VALUES ('%s')`, table, header, state_nonce)
 	err = db.Exec(sql_command) //`INSERT INTO state (state_value) VALUES ('Testing')`
 	if err != nil{ 
+		err = errors.New("FILE: sqlite_helper FUNC: Write_state_nonce CALL: db.Exec " + err.Error())
 		return err
 	}
 	err = db.Close()
-	return err
+	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Write_state_nonce CALL: db.Close " + err.Error())
+		return err
+	}	
+	return nil
 }
 
 //This returns the state or nonce that was used to create the secure url and the player tag associated with that session.
@@ -132,20 +137,21 @@ func Check_state_nonce(state_nonce string, table string) (bool, string, error){
 	} else if table == "nonce" {
 		header = "nonce_value"
 	} else {
-		err = errors.New("db: Could not check state or nonce: invalid table name given")
+		err = errors.New("FILE: sqlite_helper FUNC: Check_state_nonce INVALID PARAMETER: Must be state or nonce")
 		return false, "", err
 	}
 
 	sql_query_string := fmt.Sprintf(`SELECT * FROM '%s' WHERE %s == '%s'`, table, header, state_nonce)
 	sql_query, _, err := db.Prepare(sql_query_string)
 	if err != nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Write_state_nonce CALL: db.Prepare " + err.Error())
 		return false,"",err
 	}
-	for sql_query.Step() {
+	if sql_query.Step() {
 		player_tag := sql_query.ColumnText(1)
-
 		sql_query.Close()
 		err = delete_state_nonce(state_nonce, table, db)
+		if err!=nil{return true, player_tag, err}
 		return true, player_tag, nil
 	} 
 	
@@ -160,17 +166,22 @@ func delete_state_nonce(state_nonce string, table string, db *sqlite3.Conn) erro
 	} else if table == "nonce" {
 		header = "nonce_value"
 	} else {
-		err := errors.New("db: Could not delete state or nonce: invalid table name given")
+		err := errors.New("FILE: sqlite_helper FUNC: delete_state_nonce INVALID PARAMETER: Must be state or nonce")
 		return err
 	}
 
 	sql_query_string := fmt.Sprintf(`DELETE FROM '%s' WHERE '%s' == '%s'`, table, header, state_nonce )
 	err := db.Exec(sql_query_string)
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: delete_state_nonce CALL: db.Exec " + err.Error())
 		return err
 	}
 	err = db.Close()
-	return err
+		if err!=nil{
+			err = errors.New("FILE: sqlite_helper FUNC: delete_state_nonce CALL: db.Close " + err.Error())
+			return err
+		}
+	return nil
 }
 
 //Works with the new fields!
@@ -190,6 +201,7 @@ func Write_twitch_info(sub string, display_name string, access_token string, ref
 		sql_command := fmt.Sprintf("INSERT INTO twitch_user_info (%s) VALUES ('%s', '%s' , '%s', '%s', '%s', '%s', '%s', '%s', %d, %d, '%s', %d, '%s')", sql_table_values, sub, display_name, access_token, refresh_token, scope, token_type, app_request, app_received, token_exp, token_iat, token_iss, online, player_tag)
 		err = db.Exec(sql_command)	
 		if err!=nil{
+			err = errors.New("FILE: sqlite_helper FUNC: Write_twitch_info CALL: db.Exec " + err.Error())
 			return err
 		}
 	return nil
@@ -209,12 +221,13 @@ func Get_twitch_user(id_type string, id string) (Twitch_user, error){
 	} else if id_type == "display_name" {
 		field = "display_name"
 	} else {
-		err = errors.New("invalid id type")
+		err = errors.New("FILE: sqlite_helper FUNC: Get_twitch_user INVALID PARAMETER: Must be sub or display_name")
 		return twitch_user, err
 	}
 	sql_query_string := fmt.Sprintf(`SELECT * FROM twitch_user_info WHERE %s == '%s'`, field, id)
 	sql_query, _, err := db.Prepare(sql_query_string)
 	if err != nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Get_twitch_user CALL: db.Prepare " + err.Error())
 		return twitch_user, err
 	}
 
@@ -249,11 +262,10 @@ func Twitch_user_online(sub string)(bool, error){
 	sql_query, _, err := db.Prepare(sql_query_string)	
 
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Twitch_user_online CALL: db.Prepare " + err.Error())
 		return false, err
 	}
-
 	false_true := 3
-
 	for sql_query.Step(){
 		false_true = sql_query.ColumnInt(0)
 	}
@@ -263,7 +275,7 @@ func Twitch_user_online(sub string)(bool, error){
 	} else if false_true == 1{
 		return true, nil
 	} else {
-		err = errors.New("db: online not set for twitch user")
+		err = errors.New("FILE: sqlite_helper FUNC: Twitch_user_online BUG: online not set for twitch user")
 		return false, err
 	}
 }
@@ -274,7 +286,7 @@ func Update_online(sub string, online int)(error){
 	if err!=nil{return err}
 
 	if online >= 2 {
-		err = errors.New("db: online must be 1 or 0")
+		err = errors.New("FILE: sqlite_helper FUNC: Update_online BUG: Online must be set to 0 or 1")
 		return err
 	}
 
@@ -282,6 +294,7 @@ func Update_online(sub string, online int)(error){
 	err = db.Exec(sql_query_string)
 
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Update_online CALL: db.Exec " + err.Error())
 		return err
 	}
 	return nil
@@ -296,6 +309,7 @@ func Update_tokens(access_token string, refresh_token string, sub string)(error)
 	sql_query_string := fmt.Sprintf(`UPDATE twitch_user_info SET access_token = '%s', refresh_token = '%s' WHERE sub=='%s'`, access_token, refresh_token, sub)
 	err = db.Exec(sql_query_string)
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Update_tokens CALL: db.Exec " + err.Error())
 		return err
 	}
 	return nil
@@ -309,6 +323,7 @@ func Remove_twitch_user(sub string) error {
 	sql_string := fmt.Sprintf("DELETE FROM twitch_user_info WHERE sub=='%s'", sub)
 	err = db.Exec(sql_string)
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Remove_twitch_user CALL: db.Exec " + err.Error())
 		return err
 	}
 	return nil
@@ -322,6 +337,7 @@ func Write_new_prediction(streamer_id string, prediction_id string, created_at s
 	sql_query_string := fmt.Sprintf(`INSERT INTO prediction ('broadcaster_id', 'prediction_id', 'status', 'created_at') VALUES('%s','%s','ACTIVE', '%s')`,streamer_id, prediction_id, created_at)
 	err = db.Exec(sql_query_string)
 	if err !=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Write_new_prediction CALL: db.Exec " + err.Error())
 		return err
 	}
 	db.Close()
@@ -340,6 +356,7 @@ func Write_new_prediction_outcomes(predictions []map[string]interface{}) error {
 		sql_query_string := fmt.Sprintf(`INSERT INTO outcomes ('prediction_id', 'outcome_id', 'title', 'lose_win') VALUES('%s', '%s','%s', %d)`,prediction_id, outcome_id, title, lose_win)	
 		db.Exec(sql_query_string)
 		if err!=nil{
+			err = errors.New("FILE: sqlite_helper FUNC: Write_new_prediction_outcomes CALL: db.Exec " + err.Error())
 			return err
 		}
 	}
@@ -356,6 +373,7 @@ func Get_predictions(sub string, status string) (string,string, error) {
 	sql_query_string := fmt.Sprintf(`SELECT * FROM prediction WHERE broadcaster_id == '%s' AND status == '%s'`, sub, status)
 	sql_query, _, err := db.Prepare(sql_query_string)
 	if err != nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Get_predictions CALL: db.Prepare " + err.Error())
 		return "", "" ,err
 	}
 	prediction_id := ""
@@ -365,11 +383,11 @@ func Get_predictions(sub string, status string) (string,string, error) {
 		created_at = sql_query.ColumnText(3)
 	}
 	if prediction_id == ""{
-		err = errors.New("db: prediction id was blank for get predictions")
+		err = errors.New("FILE: sqlite_helper FUNC: Get_predictions BUG: prediction_id was blank")
 		return "", "", err
 	}
 	if created_at == ""{
-		err = errors.New("db: created at was blank for get predictions")
+		err = errors.New("FILE: sqlite_helper FUNC: Get_predictions BUG: created_at was blank")
 		return "", "", err
 	}
 
@@ -385,6 +403,7 @@ func Get_prediction_outcome_id(prediction_id string, lose_win int)(string, error
 	sql_query_string := fmt.Sprintf(`SELECT * FROM outcomes WHERE prediction_id == '%s' AND lose_win == '%d'`, prediction_id, lose_win)
 	sql_query, _, err := db.Prepare(sql_query_string)
 	if err != nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Get_predictions_outcome_id CALL: db.Prepare " + err.Error())
 		return "", err
 	}
 	outcome_id := ""
@@ -392,7 +411,7 @@ func Get_prediction_outcome_id(prediction_id string, lose_win int)(string, error
 		outcome_id = sql_query.ColumnText(1)
 	} 
 	if outcome_id ==""{
-		err = errors.New("db: outcome id was blank for get prediction outcome id")
+		err = errors.New("FILE: sqlite_helper FUNC: Get_predictions BUG: outcome_id was blank")
 		return "", err
 	}
 	defer db.Close()
@@ -417,6 +436,7 @@ func Delete_prediction_id(sub string)error{
 	sql_query_string := fmt.Sprintf(`DELETE FROM prediction WHERE broadcaster_id == '%s'`, prediction_id)
 	err = db.Exec(sql_query_string)
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Delete_prediction_id CALL: db.Exec " + err.Error())
 		return err
 	}
 	defer db.Close()
@@ -427,6 +447,7 @@ func Delete_outcomes(db *sqlite3.Conn, prediction_id string) error{
 	sql_query_string := fmt.Sprintf(`DELETE FROM outcomes WHERE prediction_id == '%s'`, prediction_id)
 	err := db.Exec(sql_query_string)
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Delete_outcomes CALL: db.Exec " + err.Error())
 		return err
 	}
 	return err
@@ -440,6 +461,7 @@ func Delete_all_predictions(sub string) error{
 	sql_query_string := fmt.Sprintf(`DELETE FROM prediction WHERE broadcaster_id == '%s'`, sub)
 	err = db.Exec(sql_query_string)
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Delete_all_predictions CALL: db.Exec " + err.Error())
 		return err
 	}
 	return err
@@ -448,17 +470,14 @@ func Delete_all_predictions(sub string) error{
 func Write_sub_event(event_id string) error{
 	db, err := open_db()
 
-	if err!=nil{
-		return err
-	}
+	if err!=nil{return err}
 	defer db.Close()
 	sql_query_string := fmt.Sprintf(`INSERT INTO Sub_Events (Sub_Event_ID) VALUES ('%s')`, event_id)
-
 	err = db.Exec(sql_query_string)
 	if err != nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Write_sub_event CALL: db.Exec " + err.Error())
 		return err
 	}
-
 	return nil
 }
 
@@ -475,6 +494,7 @@ func Get_sub_event(event_id string)(bool, error){
 	sql_query, _, err := db.Prepare(sql_query_string)
 
 	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Get_sub_event CALL: db.Prepare " + err.Error())
 		return false, err
 	}
 
@@ -500,6 +520,7 @@ func Get_all_access_tokens()([]Twitch_user_refresh, error){
 	sql_query, _ ,err := db.Prepare(sql_query_string)
 
 	if err !=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Get_all_access_tokens CALL: db.Prepare " + err.Error())
 		return Refresh_list, err
 	}
 
@@ -513,13 +534,15 @@ func Get_all_access_tokens()([]Twitch_user_refresh, error){
 	return Refresh_list, nil
 }
 
-func Update_nonce(nonce string, player_tag string)(error){
+func Update_state(state string, player_tag string)(error){
 	db, err := open_db()
 	if err!=nil{return err}
-	sql_query_string := fmt.Sprintf(`UPDATE state SET player_id = '%s' WHERE state_value == '%s'`,player_tag, nonce)
+	sql_query_string := fmt.Sprintf(`UPDATE state SET player_id = '%s' WHERE state_value == '%s'`,player_tag, state)
 	err = db.Exec(sql_query_string)
 
-	if err!=nil{return err}
+	if err!=nil{
+		err = errors.New("FILE: sqlite_helper FUNC: Update_state CALL: db.Exec " + err.Error())
+		return err}
 
 	return nil
 }

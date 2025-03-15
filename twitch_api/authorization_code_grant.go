@@ -16,7 +16,7 @@ func Generate_state_nonce(state_nonce string) ( string, error) {
 	randomBytes := make([]byte, 32)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
-		err = errors.New("there was a problem reading the randomBytes byte")
+		err = errors.New("FILE: authorization_code_grant FUNCTION: Generate_state_nonce Line CALL rand.Read")
 		return "", err
 	}
 	random_string := base64.RawURLEncoding.EncodeToString(randomBytes)
@@ -27,12 +27,12 @@ func Generate_state_nonce(state_nonce string) ( string, error) {
 	} else if state_nonce == "nonce" {
 		return random_string, err
 	} else {
-		err = errors.New("invalid table given")
+		err = errors.New("file: authorization_code_grant function: Generate_state_nonce INVALID PARAMETER: Must be state or nonce")
 	}
 	if err != nil{
 		return "", err
 	}
-	return random_string, err
+	return random_string, nil
 }
 
 //This function generates the url that streamers will use to connect to Twitch. It returns a URL and a nonce, and an error.
@@ -57,7 +57,7 @@ func Generate_authorize_app_url(scope_request string, Env_struct logger.Env_vari
 	}
 	url_quary.Set("nonce", nonce)
 	encoded_url_quary := url_quary.Encode()
-	uri_url_quary := "&redirect_uri=" + Env_struct.ROYALE_BETS_URL + "/redirect" + "&"
+	uri_url_quary := "?redirect_uri=" + Env_struct.ROYALE_BETS_URL + "/redirect" + "&"
 	return_url := Env_struct.OAUTH_AUTHORIZE_URI + uri_url_quary + encoded_url_quary
-	return return_url, nonce, nil
+	return return_url, state, nil
 }

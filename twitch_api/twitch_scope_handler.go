@@ -3,7 +3,6 @@ package twitch_api
 import (
 	"strings"
 	"errors"
-	//"fmt"
 )
 
 func Scope_unpacker(scope_array []string) (string, error){
@@ -14,7 +13,7 @@ func Scope_unpacker(scope_array []string) (string, error){
 		
 		_, err := return_scope_string.WriteString(scope_string)
 		if err!= nil{
-			err = errors.New("there was a problem writing to the string scope maker")
+			err = errors.New("FILE: Twitch_scope_handler FUNC: Scope_unpacker CALL: string.WriteString" + err.Error())
 			return "", err
 		}
 
@@ -38,6 +37,7 @@ func Scope_requests(request string) (string, error){
 	}
 
 	if err != nil {
+		err = errors.New("FILE: Twitch_scope_handler FUNC: Scope_requests " + err.Error())
 		return "", err
 	}
 	return request, err
