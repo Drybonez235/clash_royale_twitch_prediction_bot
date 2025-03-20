@@ -42,6 +42,4 @@ func Scope_requests(request string) (string, error){
 	}
 	return request, err
 }
-// func Scope_packer() (string, error){
-// 	return "", err
-// }
+

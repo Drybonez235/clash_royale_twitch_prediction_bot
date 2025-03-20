@@ -12,11 +12,13 @@ import (
 
 func main() {
 
-	Env_struct, err := logger.Get_env_variables("/Users/jonathanlewis/Documents/Projects/clash_royale_twitch_prediction_bot/.env")
+	Env_struct, err := logger.Get_env_variables("/Users/jonathanlewis/Documents/Projects/clash_royale_twitch_prediction_bot/test.env")
 	if err != nil {
 		panic(err)
 	}
 	logger := logger.NewStandardLogger()
+	//Write_test_user(Env_struct)
+
 	server.Start_server(logger, Env_struct)
 }
 
@@ -65,31 +67,10 @@ func test_twitch_api() {
 
 }
 
-func test_test_twitch_api() {
-	// err := twitch.Test_request_user_oath_token(user_id)
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	err := sqlite.Write_twitch_info("29277192", "Name", "9d4bc3bbde86b87", "ghsifnwofieflakdjenfonf", "not important", "bearer", "", "", 0, 0, "", 0, "2VL9VP8Y0")
-
+func Write_test_user(Env_struct logger.Env_variables) {
+	err := sqlite.Write_twitch_info("29277192", "Oxalate", "a21d52fd6f404ce", "a21d52fd6f404ce", "not important", "bearer", "", "", 0, 0, "", 0, "2YJRUQ2Q")
 	if err != nil {
 		panic(err)
 	}
-	// err = sqlite.Write_twitch_info("10209020", "Name", "hgjofhqofn", "ig0pqidhduchauhd", "not important", "bearer", "","",0,0,"",0,"2VL9VP8Y0")
-
-	// if err!=nil{
-	// 	panic(err)
-	// }
-
-	// user, err := sqlite.Get_twitch_user("sub", user_id)
-
-	// if err!= nil{
-	// 	fmt.Println(err)
-	// }
-	// err = server.Create_EventSub(user, "stream.online")
-	// if err!=nil{
-	// 	panic(err)
-	// }
 
 }

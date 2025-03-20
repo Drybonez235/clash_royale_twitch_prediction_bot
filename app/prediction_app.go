@@ -11,6 +11,7 @@ import (
 )
 
 func Start_prediction_app(sub string, Env_struct logger.Env_variables) error {
+	fmt.Println("Started Prediction App")
 	user, err := sqlite.Get_twitch_user("sub", sub)
 	if err!=nil{
 		return err
@@ -24,11 +25,13 @@ func Start_prediction_app(sub string, Env_struct logger.Env_variables) error {
 
 
 	for stream {
+		fmt.Println("We did start the stream loop")
 		//We have to check to see if there is an active prediction here that was set by me. IF it was not set by me, then we need to wait.
 		prediction_id, _, err := sqlite.Get_predictions(user.User_id, "ACTIVE")
 
-	//The problem is that I check my db to see if there are any active predictions. Right now there is not.
-	//However, when I check tw
+		if prediction_id == "null"{
+			prediction_id = ""
+		}
 
 		if err!=nil{return err}
 		own_active_prediction, err := twitch.Check_prediction(sub, user.Access_token, prediction_id, Env_struct)
@@ -37,17 +40,20 @@ func Start_prediction_app(sub string, Env_struct logger.Env_variables) error {
 		}
 
 		 if own_active_prediction == "our_prediction" {
+			fmt.Println("Our prediction")
 			err = Watch_prediction(sub, user, Env_struct)
 			if err!=nil{
 				return err
 			}
 
 		 }else if own_active_prediction == "no_active_prediction"{
+			fmt.Println("No active prediction")
 			err = twitch.Start_prediction(user, Env_struct)
 			if err!=nil{
 				return err
 			}
 		} else if own_active_prediction == "not_our_prediction" {
+			fmt.Println("Not our prediction")
 			time.Sleep(30 * time.Second)
 		} else {
 			err = errors.New("FILE: prediction_app FUNC: Start_prediction_app BUG: own_active_prediction invalid")
@@ -81,7 +87,7 @@ func Watch_prediction(sub string, user sqlite.Twitch_user, Env_struct logger.Env
 	}
 	new_battle := "no_new_battles"
 	for (new_battle == "no_new_battles"){
-
+		fmt.Println("No new battles")
 		user, err := sqlite.Get_twitch_user("sub", sub)
 		if err!=nil{return err}
 		if user.Online != 1{
@@ -97,6 +103,7 @@ func Watch_prediction(sub string, user sqlite.Twitch_user, Env_struct logger.Env
 		if new_battle == "no_new_battles"{
 			time.Sleep(30 * time.Second)
 		} else if new_battle == "win"{
+			fmt.Println("You won")
 			outcome_id, err := sqlite.Get_prediction_outcome_id(prediction_id, 1)
 			if err!=nil{
 				return err
@@ -111,8 +118,8 @@ func Watch_prediction(sub string, user sqlite.Twitch_user, Env_struct logger.Env
 			}
 			return nil
 		} else if new_battle == "lose"{
+			fmt.Println("You lost")
 			outcome_id, err := sqlite.Get_prediction_outcome_id(prediction_id, 0)
-			fmt.Println("Battle lose")	
 			if err!=nil{
 				return err
 			}

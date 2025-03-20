@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-
 	app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
@@ -25,7 +24,6 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 		err = errors.New("FILE event_handler FUNC: Handle_event CALL: json.Unmarshal " + err.Error())
 		return err
 	}
-
 	exists, err := sqlite.Get_sub_event(webhook_struct.Subscription.ID)
 
 	if err!=nil{
@@ -43,7 +41,7 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 		
 		if webhook_struct.Subscription.Type == "stream.online"{
 			logger.Info("stream online for: " + webhook_struct.Event.BroadcasterUserLogin)
-			err = stream_start(webhook_struct.Event.BroadcasterUserID, Env_struct)
+			err = stream_start(webhook_struct.Subscription.Condition.BroadcasterUserID, Env_struct)
 			if err!=nil{
 				return err
 			}
@@ -59,7 +57,6 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 }
 
 func stream_start(streamer_id string, Env_struct logger.Env_variables)(error){
-
 	if streamer_id == ""{
 		err := errors.New("FILE event_handler FUNC: stream_start BUG: streamer_id was blank")
 		return err
@@ -79,7 +76,20 @@ func stream_start(streamer_id string, Env_struct logger.Env_variables)(error){
 		return err
 	}
 
-	go app.Start_prediction_app(user.User_id, Env_struct)
+	//go app.Start_prediction_app(user.User_id, Env_struct)
+
+	errCh := make(chan error, 1)
+
+	// Start the goroutine and pass the channel
+	go func() {
+		errCh <- app.Start_prediction_app(user.User_id, Env_struct)
+		close(errCh)
+	}()
+
+	// Capture errors from the goroutine
+	if err := <-errCh; err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -112,7 +122,7 @@ func stream_end(streamer_id string, Env_struct logger.Env_variables)(error){
 		return err
 	}
 
-	if prediction_id == ""{
+	if prediction_id == "null"{
 		return nil
 	}
 

@@ -28,10 +28,10 @@ func NewStandardLogger() *StandardLogger {
 	}
 
 	return &StandardLogger{
-		debugLogger: log.New(file, "DEBUG: ", log.Ldate|log.Ltime|log.Lshortfile),
-		infoLogger:  log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile),
-		warnLogger:  log.New(file, "WARN: ", log.Ldate|log.Ltime|log.Lshortfile),
-		errorLogger: log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile),
+		debugLogger: log.New(file, "DEBUG: ", log.Ldate|log.Ltime),
+		infoLogger:  log.New(file, "INFO: ", log.Ldate|log.Ltime),
+		warnLogger:  log.New(file, "WARN: ", log.Ldate|log.Ltime),
+		errorLogger: log.New(file, "ERROR: ", log.Ldate|log.Ltime),
 	}
 }
 

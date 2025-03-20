@@ -12,9 +12,6 @@ import (
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 )
 
-//const twitch_prediction_uri = "https://api.twitch.tv/helix/predictions"
-const twitch_prediction_uri = "http://localhost:8080/mock/predictions"
-
 type Prediction_data_array struct{
 	Data []Prediction_meta_data `json:"data"`
 	//Pagination any `json:"pagination"`
@@ -63,8 +60,6 @@ type Outcome struct {
 }
 
 func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_variables) error {
-	fmt.Println("Start of prediction functiom")
-
 	//Here we are calling the varify function and passing it all the info it needs. You will need a few if statments if it faisls
 
 	// valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id, twitch_user.Refresh_token)
@@ -139,13 +134,14 @@ func prediction_body(sub string, display_name string) ([]byte, error){
 
 //THis is a new untested function... Need to make sure it works. It is called to see if we need to make a new prediction OR wait.
 func Check_prediction(sub string, bearer string, prediction_id string, Env_struct logger.Env_variables)(string, error){
-
+	fmt.Println("Check predictions fired")
 	client := &http.Client{}
 	url_quary := url.Values{}
 	url_quary.Set("broadcaster_id", sub)
 	url_quary.Set("first", "0")
 	//If there is an active prediction in my DB, we will search for it here. If not, we don't set the id.
 	if prediction_id != ""{
+		fmt.Println("Prediction id was not blank and that means we search for a specific one.")
 		url_quary.Set("id", prediction_id)
 	}
 	url_encoded_string := url_quary.Encode()
@@ -163,19 +159,15 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	req.Header.Set("Client-Id", Env_struct.APP_ID)
 
 	resp, err := client.Do(req)
-
 	if err!=nil {
 		err = errors.New("FILE: twitch_prediction FUNC: Check_prediction CALL: client.Do " + err.Error())
 		return "", err
 	}
-	
 	if resp.StatusCode != http.StatusOK{
 		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do " + resp.Status)
 		return "", err
 	}
-
 	body, err := io.ReadAll(resp.Body)
-
 	if err!=nil{
 		err = errors.New("FILE: twitch_prediction FUNC: Check_prediction CALL: io.ReadAll " + err.Error())
 		return "", err
@@ -184,7 +176,6 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	var prediction_body Prediction_data_array
 
 	err = json.Unmarshal(body, &prediction_body)
-
 	if err!=nil{
 		err = errors.New("FILE: twitch_prediction FUNC: Check_prediction CALL: json.Unmarshal " + err.Error())
 		return "", err
@@ -192,7 +183,6 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 
 	if prediction_body.Data[0].Status == "ACTIVE" || prediction_body.Data[0].Status == "LOCKED"{
 		current_prediction, _, err := sqlite.Get_predictions(sub, "ACTIVE")
-
 		if err!=nil{
 			return "", err
 		}

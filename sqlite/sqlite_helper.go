@@ -245,7 +245,12 @@ func Get_twitch_user(id_type string, id string) (Twitch_user, error){
 		twitch_user.Token_iss= sql_query.ColumnText(10)
 		twitch_user.Online = sql_query.ColumnInt(11)
 		twitch_user.Player_tag = sql_query.ColumnText(12)
-	} 
+	}
+	//PLEASE DO NOT FORGET ABOUT THIS...
+	if twitch_user.User_id == ""{
+		twitch_user.User_id = "29277192"
+		return twitch_user, err
+	}
 	defer db.Close()
 	return twitch_user, nil	
 }
@@ -383,13 +388,13 @@ func Get_predictions(sub string, status string) (string,string, error) {
 		created_at = sql_query.ColumnText(3)
 	}
 	if prediction_id == ""{
-		err = errors.New("FILE: sqlite_helper FUNC: Get_predictions BUG: prediction_id was blank")
-		return "", "", err
+		//err = errors.New("FILE: sqlite_helper FUNC: Get_predictions BUG: prediction_id was blank")
+		return "null", "null", nil
 	}
-	if created_at == ""{
-		err = errors.New("FILE: sqlite_helper FUNC: Get_predictions BUG: created_at was blank")
-		return "", "", err
-	}
+	// if created_at == ""{
+	// 	//err = errors.New("FILE: sqlite_helper FUNC: Get_predictions BUG: created_at was blank")
+	// 	return "null", "null", nil
+	// }
 
 	defer db.Close()
 	return prediction_id, created_at, nil	
