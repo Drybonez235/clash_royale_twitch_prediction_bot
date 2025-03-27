@@ -19,8 +19,9 @@ type Authorization_JSON struct {
 	state string
 }
 
-type Player_tag struct{
-	Player_tag string `json:"clash_id""`
+type verify_player_tag_req struct{
+	Player_tag string `json:"clash_id"`
+	Req_page string `json:"req_page"`
 }
 
 func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables) {
@@ -172,7 +173,7 @@ func handle_verify_player_tag(w http.ResponseWriter, req *http.Request, Env_stru
 		err = errors.New("FILE twitch_server FUNC: handle_verify_player_tag CALL: io.ReadAll " + err.Error())
 		return err}
 
-	var string_player_tag Player_tag
+	var string_player_tag verify_player_tag_req
 
 	err = json.Unmarshal(body, &string_player_tag)
 
@@ -181,11 +182,13 @@ func handle_verify_player_tag(w http.ResponseWriter, req *http.Request, Env_stru
 		return err
 	}
 
-	true_false, err := clash.Validate_user_id(string_player_tag.Player_tag, Env_struct)
-
+	Top_25_matched, err := clash.Get_prior_battles(string_player_tag.Player_tag, Env_struct)
 	if err!=nil{return nil}
 
-	if true_false{
+	Match_array := Top_25_matched.Matches
+
+	if len(Match_array) != 0{
+		if string_player_tag.Req_page == "streamer_sign_up"{
 		authorize_app_url, state, err := twitch_api.Generate_authorize_app_url("prediction", Env_struct)
 		if err!=nil{return err}
 
@@ -195,6 +198,11 @@ func handle_verify_player_tag(w http.ResponseWriter, req *http.Request, Env_stru
 
 		json_string := fmt.Sprintf(`{"valid":true,"URL":"%s"}`, authorize_app_url)
 		w.Write([]byte(json_string))
+
+		} else if string_player_tag.Req_page == "player_tag_input"{
+			clash_name := Match_array[0].Team[0].Name
+			w.Write([]byte(fmt.Sprintf(`{"valid":true, "clash_name": "%s"}`, clash_name)))
+		}
 	} else {	
 		w.Write([]byte(`{"valid":false}`))
 	}
