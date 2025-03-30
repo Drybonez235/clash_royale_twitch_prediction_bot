@@ -5,11 +5,13 @@ import (
 	"encoding/base64"
 	"errors"
 	"net/url"
+
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	"github.com/ncruces/go-sqlite3"
 )
 
-func Generate_state_nonce(state_nonce string) ( string, error) {
+func Generate_state_nonce(state_nonce string, db *sqlite3.Conn) ( string, error) {
 	randomBytes := make([]byte, 32)
 	_, err := rand.Read(randomBytes)
 	if err != nil {
@@ -20,7 +22,7 @@ func Generate_state_nonce(state_nonce string) ( string, error) {
 	table := ""
 	if state_nonce == "state"{
 		table = "state"
-		err = sqlite.Write_state_nonce(random_string, table)
+		err = sqlite.Write_state_nonce(db, random_string, table)
 	} else if state_nonce == "nonce" {
 		return random_string, err
 	} else {
@@ -34,7 +36,7 @@ func Generate_state_nonce(state_nonce string) ( string, error) {
 
 //This function generates the url that streamers will use to connect to Twitch. It returns a URL and a nonce, and an error.
 //The twitch api inforamtion for this API can be found here: https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#oidc-authorization-code-grant-flow
-func Generate_authorize_app_url(scope_request string, Env_struct logger.Env_variables)(string, string, error){
+func Generate_authorize_app_url(scope_request string, Env_struct logger.Env_variables, db *sqlite3.Conn)(string, string, error){
 	url_quary := url.Values{}
 	url_quary.Set("client_id", Env_struct.APP_ID)
 	url_quary.Set("force_verify", "false")
@@ -44,12 +46,12 @@ func Generate_authorize_app_url(scope_request string, Env_struct logger.Env_vari
 		return "", "",err
 	}
 	url_quary.Set("scope", scope)
-	state, err := Generate_state_nonce("state")
+	state, err := Generate_state_nonce("state", db)
 	if err != nil{
 		return "", "", err
 	}
 	url_quary.Set("state", state)
-	nonce, err := Generate_state_nonce("nonce")
+	nonce, err := Generate_state_nonce("nonce", db)
 	if err != nil{
 		return "", "", err
 	}

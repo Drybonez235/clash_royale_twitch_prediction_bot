@@ -2,17 +2,18 @@ package twitch_api
 
 import (
 	//"bytes"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"bytes"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	"github.com/ncruces/go-sqlite3"
 )
 
 type access_token_response_json struct {
@@ -82,7 +83,7 @@ type TransportSubRequest struct {
 //This function takes the code in the response from the twitch streamer granting access and obtains an OAuth Token.
 //It sends a POST request with the data in the URL encoded body (NOT to be confused with query parameters). form encoded url encoded parameters.
 //The twitch API infrmation is found at https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#oidc-authorization-code-grant-flow
-func Request_user_oath_token(code string, player_tag string, Env_struct logger.Env_variables) (error) {
+func Request_user_oath_token(code string, player_tag string, Env_struct logger.Env_variables, db *sqlite3.Conn) (error) {
 	fmt.Println("Request_user_oath_token ran")
 	//twitch_oath_url := "https://id.twitch.tv/oauth2/token?"
 	url_quary := url.Values{}
@@ -117,7 +118,7 @@ func Request_user_oath_token(code string, player_tag string, Env_struct logger.E
 		err = errors.New("FILE: twitch_api FUNC: Generate_state_nonce CALL: json.Unmarshal " + err.Error())
 		return err	
 	}
-	err = Get_claims(new_user.Access_token, new_user, player_tag, Env_struct)
+	err = Get_claims(new_user.Access_token, new_user, player_tag, Env_struct, db)
 	if err != nil{
 		return err
 	}
@@ -127,7 +128,7 @@ func Request_user_oath_token(code string, player_tag string, Env_struct logger.E
 //Gets the claims information assoicated with an OAth token. This is where we get the sub ID.
 //Sends a GET request to https://id.twitch.tv/oauth2/userinfo with the user access token as a Bearer header.
 //Information about the Twitch API can be found at: https://dev.twitch.tv/docs/authentication/getting-tokens-oidc/#getting-claims-information-from-an-access-token
-func Get_claims(oauth_token string, new_user access_token_response_json, player_tag string, Env_struct logger.Env_variables) (error){
+func Get_claims(oauth_token string, new_user access_token_response_json, player_tag string, Env_struct logger.Env_variables, db *sqlite3.Conn) (error){
 	//twitch_verifiy_user_endpoint := "https://id.twitch.tv/oauth2/userinfo"
 	fmt.Println("Get Claims Ran")
 	bearer_token := "Bearer " + oauth_token
@@ -165,7 +166,7 @@ func Get_claims(oauth_token string, new_user access_token_response_json, player_
 		return err
 	}
 
-	err = sqlite.Write_twitch_info(claims_json.Sub, display_name, new_user.Access_token, new_user.Refresh_token, unpacked_scope, new_user.Token_type,
+	err = sqlite.Write_twitch_info(db ,claims_json.Sub, display_name, new_user.Access_token, new_user.Refresh_token, unpacked_scope, new_user.Token_type,
 		claims_json.Aud, claims_json.Aud, claims_json.Exp, claims_json.Iat, claims_json.Iss, 0, player_tag)
 
 	if err!=nil{
@@ -275,7 +276,7 @@ func Request_app_oath_token(Env_struct logger.Env_variables) (string, error) {
 //This get a new OAuth token using a refresh token for a twitch user who has granted access.
 //Sends a POST request with a URL-Encoded BODY to https://id.twitch.tv/oauth2/token
 //Information about the twitch API can be found at: https://dev.twitch.tv/docs/authentication/refresh-tokens/#how-to-use-a-refresh-token
-func Refresh_token(refresh_token string, user_id string, Env_struct logger.Env_variables) (bool, error){
+func Refresh_token(refresh_token string, user_id string, Env_struct logger.Env_variables, db *sqlite3.Conn) (bool, error){
 	client := &http.Client{}
 	url_quary := url.Values{}
 	url_quary.Set("client_id", Env_struct.APP_ID)
@@ -305,7 +306,7 @@ func Refresh_token(refresh_token string, user_id string, Env_struct logger.Env_v
 		err = errors.New("FILE: twitch_api FUNC: Refresh_token CALL: json.Unmarshal" + err.Error())
 		return false, err
 	}
-	err = sqlite.Update_tokens(refresh_token_response.Access_token, refresh_token_response.Refresh_token, user_id)
+	err = sqlite.Update_tokens(db, refresh_token_response.Access_token, refresh_token_response.Refresh_token, user_id)
 	if err!=nil{
 		return false, err
 	}

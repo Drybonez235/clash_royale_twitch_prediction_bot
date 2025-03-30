@@ -8,8 +8,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	"github.com/ncruces/go-sqlite3"
 )
 
 type Prediction_data_array struct{
@@ -59,7 +61,7 @@ type Outcome struct {
 	Title string `json:"title"`
 }
 
-func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_variables) error {
+func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_variables, db *sqlite3.Conn) error {
 	//Here we are calling the varify function and passing it all the info it needs. You will need a few if statments if it faisls
 
 	// valid, err := Validate_token(twitch_user.Access_token, twitch_user.User_id, twitch_user.Refresh_token)
@@ -106,7 +108,7 @@ func Start_prediction(twitch_user sqlite.Twitch_user, Env_struct logger.Env_vari
 		err = errors.New("FILE: twitch_prediction FUNC: Start_prediction CALL: json.Unmarshal " + err.Error())
 		return err
 	}	
-	err = Prediction_response_parser(Prediction_data_array)
+	err = Prediction_response_parser(Prediction_data_array, db)
 	if err != nil{
 		return err
 	}
@@ -133,7 +135,7 @@ func prediction_body(sub string, display_name string) ([]byte, error){
 }
 
 //THis is a new untested function... Need to make sure it works. It is called to see if we need to make a new prediction OR wait.
-func Check_prediction(sub string, bearer string, prediction_id string, Env_struct logger.Env_variables)(string, error){
+func Check_prediction(sub string, bearer string, prediction_id string, Env_struct logger.Env_variables, db *sqlite3.Conn)(string, error){
 	fmt.Println("Check predictions fired")
 	client := &http.Client{}
 	url_quary := url.Values{}
@@ -182,7 +184,7 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	}
 
 	if prediction_body.Data[0].Status == "ACTIVE" || prediction_body.Data[0].Status == "LOCKED"{
-		current_prediction, _, err := sqlite.Get_predictions(sub, "ACTIVE")
+		current_prediction, _, err := sqlite.Get_predictions(db, sub, "ACTIVE")
 		if err!=nil{
 			return "", err
 		}
@@ -201,7 +203,7 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	}
 }
 
-func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables) error{
+func End_prediction(prediction_id string, outcome_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables, db *sqlite3.Conn) error{
 
 	if prediction_id == "" || outcome_id == ""{
 		err := errors.New("FILE: twitch_prediction FUNC: End_prediction BUG: prediction_id or outcome_id was blank")
@@ -246,14 +248,14 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	}
 	var json_message map[string]interface{} 
 	json.Unmarshal(body, &json_message)
-	err = sqlite.Delete_prediction_id(broadcaster_id)
+	err = sqlite.Delete_prediction_id(db, broadcaster_id)
 	if err !=nil{
 		return err
 	}
 	return nil
 }
 
-func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables)(error){
+func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token string, Env_struct logger.Env_variables, db *sqlite3.Conn)(error){
 	if prediction_id == "" {
 		err := errors.New("FILE: twitch_prediction FUNC: Cancel_prediction BUG: prediction_id was blank")
 		return err
@@ -297,7 +299,7 @@ func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token
 	}
 	var json_message map[string]interface{} 
 	json.Unmarshal(body, &json_message)
-	err = sqlite.Delete_prediction_id(broadcaster_id)
+	err = sqlite.Delete_prediction_id(db, broadcaster_id)
 	if err !=nil{
 		return err
 	}
@@ -306,14 +308,14 @@ func Cancel_prediction(prediction_id string, broadcaster_id string, bearer_token
 }
 
 
-func Prediction_response_parser(prediction_data_array Prediction_data_array) error{
+func Prediction_response_parser(prediction_data_array Prediction_data_array, db *sqlite3.Conn) error{
 	data := prediction_data_array.Data
 	prediction := data[0]
 	prediction_id := prediction.Id
 	streamer_id := prediction.Broadcaster_id
 	created_at := prediction.Created_at
 	created_at = created_at[0:19]+"Z"
-	err := sqlite.Write_new_prediction(streamer_id, prediction_id, created_at)
+	err := sqlite.Write_new_prediction(db, streamer_id, prediction_id, created_at)
 	if err != nil{
 		return err
 	}
@@ -331,7 +333,7 @@ func Prediction_response_parser(prediction_data_array Prediction_data_array) err
 		}
 		write_outcomes = append(write_outcomes, maps)
 	}
-	err = sqlite.Write_new_prediction_outcomes(write_outcomes)
+	err = sqlite.Write_new_prediction_outcomes(db, write_outcomes)
 	if err!=nil{
 		return err
 	}

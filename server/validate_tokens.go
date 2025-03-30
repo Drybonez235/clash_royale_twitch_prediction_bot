@@ -9,7 +9,8 @@ import (
 	"net/url"
 	"strings"
 	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
-	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	sqlite "github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
+	"github.com/ncruces/go-sqlite3"
 )
 
 type Refresh_token_response struct{
@@ -23,15 +24,15 @@ type Refresh_token_response struct{
 //  If it isn't valid, it attempts to refresh using the refresh token. If the refresh fails, then it deletes the user from the db. 
 // (Maybe in the future it could email)
 //NOT DONE
-func Validate_all_tokens(Env_struct logger.Env_variables)(error){
+func Validate_all_tokens(Env_struct logger.Env_variables,db *sqlite3.Conn)(error){
 	var Token_list []sqlite.Twitch_user_refresh
 
-	Token_list, err := sqlite.Get_all_access_tokens()
+	Token_list, err := sqlite.Get_all_access_tokens(db)
 
 	for i:=0; i<len(Token_list); i++{
 		Twitch_user := Token_list[i]
 		
-		_, err := Validate_token(Twitch_user, Env_struct)
+		_, err := Validate_token(Twitch_user, Env_struct, db)
 
 		if err!=nil{return err}
 	}
@@ -39,7 +40,7 @@ func Validate_all_tokens(Env_struct logger.Env_variables)(error){
 	return err
 }
 
-func Validate_token(Twitch_user sqlite.Twitch_user_refresh, Env_struct logger.Env_variables)(bool, error){
+func Validate_token(Twitch_user sqlite.Twitch_user_refresh, Env_struct logger.Env_variables, db *sqlite3.Conn)(bool, error){
 
 	//twitch_validation_endpoint := "https://id.twitch.tv/oauth2/validate"
 
@@ -67,13 +68,13 @@ func Validate_token(Twitch_user sqlite.Twitch_user_refresh, Env_struct logger.En
 
 	} else if resp.StatusCode == 401 {
 
-		refreshed, err := Refresh_token(Twitch_user, Env_struct)
+		refreshed, err := Refresh_token(Twitch_user, Env_struct, db)
 		if err !=nil{
 			return false, err
 		}
 
 		if !refreshed {
-			err = sqlite.Remove_twitch_user(Twitch_user.User_id)
+			err = sqlite.Remove_twitch_user(db, Twitch_user.User_id)
 			if err!=nil{
 				return false, err
 			}
@@ -83,7 +84,7 @@ func Validate_token(Twitch_user sqlite.Twitch_user_refresh, Env_struct logger.En
 	}
 	return true, err
 }
-func Refresh_token(Twitch_user sqlite.Twitch_user_refresh, Env_struct logger.Env_variables) (bool, error){
+func Refresh_token(Twitch_user sqlite.Twitch_user_refresh, Env_struct logger.Env_variables, db *sqlite3.Conn) (bool, error){
 	//refresh_token_url := "https://id.twitch.tv/oauth2/token"
 	client := &http.Client{}
 	url_quary := url.Values{}
@@ -111,7 +112,7 @@ func Refresh_token(Twitch_user sqlite.Twitch_user_refresh, Env_struct logger.Env
 	if err!=nil{
 		return false, err
 	}
-	err = sqlite.Update_tokens(refresh_token_response.Access_token, refresh_token_response.Refresh_token, Twitch_user.User_id)
+	err = sqlite.Update_tokens(db, refresh_token_response.Access_token, refresh_token_response.Refresh_token, Twitch_user.User_id)
 	if err!=nil{
 		return false, err
 	}

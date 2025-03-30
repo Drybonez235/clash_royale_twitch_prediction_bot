@@ -5,13 +5,15 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
+
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
+	"github.com/ncruces/go-sqlite3"
 )
 	
-func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger, Env_struct logger.Env_variables)(error){
+func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.StandardLogger, Env_struct logger.Env_variables, db *sqlite3.Conn)(error){
 	var webhook_struct WebhookNotification
 
 	req_body, err := io.ReadAll(req.Body)
@@ -24,7 +26,7 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 		err = errors.New("FILE event_handler FUNC: Handle_event CALL: json.Unmarshal " + err.Error())
 		return err
 	}
-	exists, err := sqlite.Get_sub_event(webhook_struct.Subscription.ID)
+	exists, err := sqlite.Get_sub_event(db, webhook_struct.Subscription.ID)
 
 	if err!=nil{
 		return err
@@ -34,20 +36,20 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 	if exists {
 		return nil
 	} else {
-		err = sqlite.Write_sub_event(webhook_struct.Subscription.ID)
+		err = sqlite.Write_sub_event(db, webhook_struct.Subscription.ID)
 		if err!=nil{
 			return err
 		}
 		
 		if webhook_struct.Subscription.Type == "stream.online"{
 			logger.Info("stream online for: " + webhook_struct.Event.BroadcasterUserLogin)
-			err = stream_start(webhook_struct.Subscription.Condition.BroadcasterUserID, Env_struct)
+			err = stream_start(webhook_struct.Subscription.Condition.BroadcasterUserID, Env_struct, db)
 			if err!=nil{
 				return err
 			}
 		} else if webhook_struct.Subscription.Type == "stream.offline"{
 			logger.Info("stream offline for: " + webhook_struct.Event.BroadcasterUserLogin)
-			err = stream_end(webhook_struct.Event.BroadcasterUserID, Env_struct)
+			err = stream_end(webhook_struct.Event.BroadcasterUserID, Env_struct, db)
 			if err!=nil{
 				return err
 			}
@@ -56,12 +58,12 @@ func Handle_event(w http.ResponseWriter, req *http.Request, logger *logger.Stand
 	return nil
 }
 
-func stream_start(streamer_id string, Env_struct logger.Env_variables)(error){
+func stream_start(streamer_id string, Env_struct logger.Env_variables, db *sqlite3.Conn)(error){
 	if streamer_id == ""{
 		err := errors.New("FILE event_handler FUNC: stream_start BUG: streamer_id was blank")
 		return err
 	}
-	user, err := sqlite.Get_twitch_user("sub", streamer_id)
+	user, err := sqlite.Get_twitch_user(db, "sub", streamer_id)
 
 	if err!=nil{return err}
 
@@ -70,7 +72,7 @@ func stream_start(streamer_id string, Env_struct logger.Env_variables)(error){
 		return err
 	}
 
-	err = sqlite.Update_online(streamer_id, 1)
+	err = sqlite.Update_online(db, streamer_id, 1)
 
 	if err!=nil{
 		return err
@@ -82,7 +84,7 @@ func stream_start(streamer_id string, Env_struct logger.Env_variables)(error){
 
 	// Start the goroutine and pass the channel
 	go func() {
-		errCh <- app.Start_prediction_app(user.User_id, Env_struct)
+		errCh <- app.Start_prediction_app(user.User_id, Env_struct, db)
 		close(errCh)
 	}()
 
@@ -94,7 +96,7 @@ func stream_start(streamer_id string, Env_struct logger.Env_variables)(error){
 	return nil
 }
 
-func stream_end(streamer_id string, Env_struct logger.Env_variables)(error){
+func stream_end(streamer_id string, Env_struct logger.Env_variables, db *sqlite3.Conn)(error){
 	var err error
 
 	if streamer_id == ""{
@@ -102,11 +104,11 @@ func stream_end(streamer_id string, Env_struct logger.Env_variables)(error){
 		return err
 	}
 
-	err = sqlite.Update_online(streamer_id, 0)
+	err = sqlite.Update_online(db, streamer_id, 0)
 
 	if err!=nil{return err}
 
-	user, err := sqlite.Get_twitch_user("sub", streamer_id)
+	user, err := sqlite.Get_twitch_user(db, "sub", streamer_id)
 
 	if err!=nil{return err}
 
@@ -116,7 +118,7 @@ func stream_end(streamer_id string, Env_struct logger.Env_variables)(error){
 	}
 
 
-	prediction_id, _ ,err := sqlite.Get_predictions(streamer_id, "ACTIVE")
+	prediction_id, _ ,err := sqlite.Get_predictions(db, streamer_id, "ACTIVE")
 
 	if err!=nil{
 		return err
@@ -126,7 +128,7 @@ func stream_end(streamer_id string, Env_struct logger.Env_variables)(error){
 		return nil
 	}
 
-	err = twitch_api.Cancel_prediction(prediction_id, streamer_id, user.Access_token, Env_struct)
+  	err = twitch_api.Cancel_prediction(prediction_id, streamer_id, user.Access_token, Env_struct,db)
 
 	if err!=nil{return err}
 
