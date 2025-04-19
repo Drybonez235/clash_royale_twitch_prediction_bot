@@ -6,11 +6,11 @@ import (
 
 	//app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	//clash "github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
-	//"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
+	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/server"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/sqlite"
 	"github.com/ncruces/go-sqlite3"
 	//twitch "github.com/Drybonez235/clash_royale_twitch_prediction_bot/twitch_api"
-	//logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
+	logger "github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
 )
 
 func main() {
@@ -32,15 +32,14 @@ func main() {
 	}
 
 
-	// Env_struct, err := logger.Get_env_variables("/Users/jonathanlewis/Documents/Projects/clash_royale_twitch_prediction_bot/test.env")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	//logger := logger.NewStandardLogger()
-	//Write_test_user(Env_struct)
-	test_clash_db(db)
+	Env_struct, err := logger.Get_env_variables("/Users/jonathanlewis/Documents/Projects/clash_royale_twitch_prediction_bot/test.env")
+	if err != nil {
+		panic(err)
+	}
+	logger := logger.NewStandardLogger()
+	
 
-	//server.Start_server(logger, Env_struct, db)
+	server.Start_server(logger, Env_struct, db)
 }
 
 func test_db() {
