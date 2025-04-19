@@ -31,6 +31,7 @@ func main() {
 		panic(err)
 	}
 
+	test_clash_db(db)
 
 	Env_struct, err := logger.Get_env_variables("/Users/jonathanlewis/Documents/Projects/clash_royale_twitch_prediction_bot/test.env")
 	if err != nil {
@@ -65,19 +66,18 @@ func test_db() {
 
 func test_clash_db(db *sqlite3.Conn){
 
-	viewers := []sqlite.Royale_bets_viewer{
-		{1, "Streamer1", "ViewerA", 100, 1000000},
-		{2, "Streamer2", "ViewerB", 200, 1000000},
-	}
-	for _, viewer := range viewers {
-		if err := sqlite.Insert_royale_bets_viewer(db, viewer); err != nil {
-			fmt.Println("Error inserting viewer:", err)
-		}
-	}
+	// viewers := []sqlite.Royale_bets_viewer{
+	// 	{10, "Streamer1", "ViewerA", 100, 1},
+	// 	{11, "Streamer2", "ViewerB", 200, 1},
+	// }
+	// for _, viewer := range viewers {
+	// 	if err := sqlite.Insert_royale_bets_viewer(db, viewer); err != nil {
+	// 		fmt.Println("Error inserting viewer:", err)
+	// 	}
+	// }
 
 	streamers := []sqlite.Royale_bets_streamer{
-		{1625097600, "Streamer1", 1625101200, 5, 2},
-		{1625097700, "Streamer2", 1625101300, 3, 4},
+		{0, "2VL9VP8Y0", 0, 5, 2},
 	}
 	for _, streamer := range streamers {
 		if err := sqlite.Insert_royale_bets_streamer(db, streamer); err != nil {
@@ -86,20 +86,14 @@ func test_clash_db(db *sqlite3.Conn){
 	}
 
 	results := []sqlite.Battle_result{
-		{"Player1", 1625097600, 3, 1},
-		{"Player2", 1625097700, 2, 2},
+		{"2VL9VP8Y0", 0, 3, 1},
+		{"2VL9VP8Y0", 1, 2, 2},
 	}
 	for _, result := range results {
 		if err := sqlite.Insert_battle_result(db, result); err != nil {
 			fmt.Println("Error inserting battle result:", err)
 		}
 	}
-
-	results_print, err := sqlite.Get_battle_result(db, "Player1", 1225097700)
-	results_print1, err := sqlite.Get_battle_result(db, "Player2", 1225097700)
-	if err!= nil{panic(err)}
-	fmt.Println(results_print)
-	fmt.Println(results_print1)
 }
 
 func test_get_all_access_tokens(db *sqlite3.Conn) {
