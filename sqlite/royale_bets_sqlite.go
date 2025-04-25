@@ -25,10 +25,10 @@ type Royale_bets_streamer struct{
 }
 
 type Battle_result struct{
-	Player_tag string
-	Battle_time int
-	Red_crowns_taken int
-	Blue_crowns_lost int
+	Player_tag string `json:"streamer_player_tag"`
+	Battle_time int `json:"battle_time"`
+	Red_crowns_taken int `json:"crowns_taken_int"`
+	Blue_crowns_lost int `json:"crowns_lost_int"`
 }
 
 type Leader_board_entry struct{
@@ -92,8 +92,6 @@ func Insert_royale_bets_viewer(db *sqlite3.Conn, viewer Royale_bets_viewer) erro
 	if err := stmt.BindInt(5, viewer.Last_refresh_time); err != nil{
 		return err
 	}
-	fmt.Println("Insert Royale Bets viewer fired Right before viewer")
-	fmt.Println(viewer)
 	return stmt.Exec()
 }
 
@@ -119,12 +117,11 @@ func Insert_royale_bets_streamer(db *sqlite3.Conn, streamer Royale_bets_streamer
 	if err := stmt.BindInt(5, streamer.Losses); err != nil {
 		return err
 	}
-	fmt.Println("Insert Royale Bets streamer fired")
-	fmt.Println(streamer)
 	return stmt.Exec()
 }
 
 func Insert_battle_result(db *sqlite3.Conn, result Battle_result) error {
+	fmt.Println("Battle result added to db: ", result)
 	stmt, _, err := db.Prepare("INSERT INTO BattleResult (Player_tag, Battle_time, Red_crowns_taken, Blue_crowns_lost) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return errors.New("Error preparing statement for BattleResult: " + err.Error())
@@ -171,14 +168,11 @@ func Get_royale_bets_viewer(db *sqlite3.Conn, session_id int, screen_name string
 		return &viewer, nil
 	}
 
-	fmt.Println("Got Royale Bets viewer fired")
-
 	return nil, errors.New("No viewer found")
 }
 
 func Get_royale_bets_streamer(db *sqlite3.Conn, streamer_player_tag string, viewer_session_id int) (*Royale_bets_streamer, error) {
 
-	fmt.Println(streamer_player_tag," This is the streamer player tag in the sql")
 	stmt, _, err := db.Prepare("SELECT Stream_start_time, Streamer_player_tag, Streamer_last_refresh_time, Wins, Losses FROM RoyaleBetsStreamer WHERE Streamer_player_tag = ? AND Stream_start_time > (? - (60000 * 60 * 12))")
 	if err != nil {
 		return nil, errors.New("Error preparing statement for RoyaleBetsStreamer: " + err.Error())
@@ -203,15 +197,14 @@ func Get_royale_bets_streamer(db *sqlite3.Conn, streamer_player_tag string, view
 			Wins:                      stmt.ColumnInt(3),
 			Losses:                    stmt.ColumnInt(4),
 		}
-		fmt.Println(streamer)
 		return &streamer, nil
 	}
-	fmt.Println("Get Royal Bets streamer fired")
-	// No result found
+	
 	return nil, nil
 }
 
 func Update_royale_bets_viewer(db *sqlite3.Conn, session_id int, screen_name string, total_points int, last_refresh_time int) error {
+
 	stmt, _, err := db.Prepare("UPDATE RoyaleBetsViewer SET Total_points = ?, Last_refresh_time = ? WHERE Session_id = ? AND Screen_name = ?")
 	if err != nil {
 		return errors.New("Error preparing statement for update_royale_bets_viewer: " + err.Error())
@@ -230,13 +223,13 @@ func Update_royale_bets_viewer(db *sqlite3.Conn, session_id int, screen_name str
 	if err := stmt.BindText(4, screen_name); err != nil {
 		return err
 	}
-	fmt.Println("Updated Royale Bets viewer fired")
-
+	fmt.Println("Updated viewer: Total Points: ", total_points, " Last Refresh Time:", last_refresh_time )
 	return stmt.Exec()
 }
 
-func Update_royale_bets_streamer_wins_losses(db *sqlite3.Conn, player_tag string, streamer_start_time int, win_lose string)(error){
-
+func Update_royale_bets_streamer_wins_losses(db *sqlite3.Conn, player_tag string, stream_start_time int , last_refresh_time int, win_lose string)(error){
+	fmt.Println("Update Streamer: Last Refresh Time ", last_refresh_time)
+	
 	var column string
 	switch win_lose {
 	case "win": 
@@ -245,26 +238,27 @@ func Update_royale_bets_streamer_wins_losses(db *sqlite3.Conn, player_tag string
 		column = "Losses = Losses + 1"
 	} 
 
-	query := "UPDATE RoyaleBetsStreamer SET " + column + " WHERE Streamer_player_tag = ? AND Stream_start_time = ?"
-
+	query := "UPDATE RoyaleBetsStreamer SET " + column + ", Streamer_last_refresh_time = ? WHERE Streamer_player_tag = ? AND Stream_start_time = ?"
+	
 	stmt, _, err := db.Prepare(query)
-
 	if err!=nil{
 		return errors.New("FILE: Royale_bets_sqlite FUNC: Update_royale_bets_streamer_wins_losses CALL: db.prepare " + err.Error())
 	}
 	defer stmt.Close()
 
-	if err := stmt.BindText(1, player_tag); err!= nil{
+	if err := stmt.BindText(2, player_tag); err!= nil{
 		return err
 	}
 
-	if err := stmt.BindInt(2, streamer_start_time); err!= nil{
+	if err := stmt.BindInt(3, stream_start_time); err!= nil{
 		return err
 	}
 
-	fmt.Println("Insert Royale Bets streamer wins losses fired")
-
-	return nil
+	if err:= stmt.BindInt(1, last_refresh_time); err!= nil{
+		return err
+	}
+//I WASNT ACTULLY CARRING OUT THE SQL
+	return stmt.Exec()
 }
 
 func Get_battle_result(db *sqlite3.Conn, player_tag string, last_refresh_time int) ([]Battle_result, error) {
@@ -291,13 +285,30 @@ func Get_battle_result(db *sqlite3.Conn, player_tag string, last_refresh_time in
 		}
 		results = append(results, result)
 	}
+	return results, nil
+}
+func Get_all_battle_results(db *sqlite3.Conn) ([]Battle_result, error) {
+	stmt, _, err := db.Prepare("SELECT * FROM BattleResult")
+	if err != nil {
+		return nil, errors.New("Error preparing statement for get_battle_result: " + err.Error())
+	}
+	defer stmt.Close()
 
-	fmt.Println("Get Battle Results fired")
+	results  := []Battle_result{}
+	for stmt.Step() {
+		result := Battle_result{
+			Player_tag:      stmt.ColumnText(0),
+			Battle_time:     stmt.ColumnInt(1),
+			Red_crowns_taken: stmt.ColumnInt(2),
+			Blue_crowns_lost: stmt.ColumnInt(3),
+		}
+		results = append(results, result)
+	}
 	return results, nil
 }
 
 func Get_top_ten_and_viewer_position(db *sqlite3.Conn, player_tag string, stream_start_time int,viewer_session_id int) (*[]Leader_board_entry, error) {
-	stmt, _, err := db.Prepare("SELECT Screen_name, Total_points, Session_id FROM RoyaleBetsViewer WHERE Streamer_player_tag = ? AND Session_id >= ?")
+	stmt, _, err := db.Prepare("SELECT Screen_name, Total_points, Session_id FROM RoyaleBetsViewer WHERE Streamer_player_tag = ? AND Session_id >= ? ORDER BY Total_points")
 	if err != nil {
 		return nil, errors.New("Error preparing statement for get_battle_result: " + err.Error())
 	}
@@ -336,6 +347,5 @@ func Get_top_ten_and_viewer_position(db *sqlite3.Conn, player_tag string, stream
 	if found{
 		entries = append(entries, viewer_rank)
 	}
-	fmt.Println("Get top ten fired")
 	return &entries, nil
 }

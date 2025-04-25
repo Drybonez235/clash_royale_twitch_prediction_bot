@@ -39,28 +39,12 @@ func main() {
 	}
 	logger := logger.NewStandardLogger()
 	
-
+	sqlite.Get_all_battle_results(db)
 	server.Start_server(logger, Env_struct, db)
 }
 
 func test_db() {
-	// err := sqlite.Create_twitch_database()
-	// if err != nil{
-	// 	panic(err)
-	// }
-
-	// user, err := sqlite.Get_twitch_user("sub","651008027")
-
-	// if err!=nil{
-	// 	panic(err)
-	// }
-	// fmt.Println(user)
-
-	// status, err := twitch.Validate_token(user.Access_token, user.User_id)
-
-	// if err!=nil{
-	// 	fmt.Println(status)
-	// }
+	
 
 }
 

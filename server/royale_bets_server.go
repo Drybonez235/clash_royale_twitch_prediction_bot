@@ -49,7 +49,6 @@ func Start_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct logg
 
 	req_body, err := io.ReadAll(req.Body)
 
-	fmt.Println(string(req_body))
 	if err!=nil{
 		return err
 	}
@@ -64,8 +63,6 @@ func Start_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct logg
 	viewer.Streamer_player_tag = viewer_json.Streamer_player_tag
 	viewer.Last_refresh_time = viewer_json.Last_refresh_time
 	viewer.Total_points = 5000
-
-	fmt.Println(viewer, "This is the viewer in the royale bets server before app. Register Viewer")
 
 	streamer_info, leader_board, err := app.Register_viewer(viewer, db)
 	if err!=nil{
@@ -92,8 +89,6 @@ func Start_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct logg
 	response.Streamer_info = *streamer_info
 	response.Leaderboard = *leader_board
 	response.Battle_results = *battle_results
-
-	fmt.Println(response)
 
 	w.Header().Set("Content-Type:", "application/json")
 	err = json.NewEncoder(w).Encode(response)
@@ -130,12 +125,15 @@ func Update_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct log
 	if err := json.Unmarshal(req_body, &viewer_json); err != nil{
 		return err
 	}
+	//UPDATE VIEWER DOES NOT UPDATE THE VIEWER DB.
 	var viewer sqlite.Royale_bets_viewer
 	viewer.Session_id = viewer_json.Session_id
 	viewer.Screen_name = viewer_json.Screen_name
 	viewer.Streamer_player_tag = viewer_json.Streamer_player_tag
 	viewer.Last_refresh_time = viewer_json.Last_refresh_time
 	viewer.Total_points = viewer_json.Total_points
+
+
 
 	streamer_info, battle_results, err := app.Update_viewer(viewer, Env_struct, db)
 	if err!=nil{
@@ -158,12 +156,10 @@ func Update_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct log
 
 	var response Royale_bets_response
 
-	fmt.Println(response, "This is the response for update royale bets.")
-
 	response.Streamer_info = *streamer_info
 	response.Battle_results = *battle_results
 	response.Leaderboard = *top_ten
-
+	fmt.Println(response, "This is the response for update royale bets.")
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(response)
 	if err!=nil{

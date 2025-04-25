@@ -1,3 +1,4 @@
 /twitch_authorization
 /.env
 /.app.log
+/test.env

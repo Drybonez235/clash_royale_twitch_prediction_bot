@@ -651,3 +651,184 @@ ERROR: 2025/04/23 20:03:38 FILE: royale_bets_app FUNC: Register_Viewer CALL: sql
 ERROR: 2025/04/23 20:03:41 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
 ERROR: 2025/04/23 20:03:45 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
 INFO: 2025/04/23 20:26:46 Started server on localhost 3000
+INFO: 2025/04/23 20:42:22 Started server on localhost 3000
+INFO: 2025/04/23 20:45:41 Started server on localhost 3000
+INFO: 2025/04/23 20:48:36 Started server on localhost 3000
+INFO: 2025/04/23 20:52:12 Started server on localhost 3000
+INFO: 2025/04/23 20:52:48 Started server on localhost 3000
+INFO: 2025/04/23 20:55:46 Started server on localhost 3000
+ERROR: 2025/04/23 20:57:58 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/23 20:58:06 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/23 20:58:27 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/23 20:58:28 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/23 20:59:07 Started server on localhost 3000
+ERROR: 2025/04/23 21:00:46 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/23 21:02:40 Started server on localhost 3000
+INFO: 2025/04/23 21:10:17 Started server on localhost 3000
+ERROR: 2025/04/23 21:16:24 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/23 21:22:59 Started server on localhost 3000
+INFO: 2025/04/23 21:28:30 Started server on localhost 3000
+INFO: 2025/04/23 21:40:11 Started server on localhost 3000
+INFO: 2025/04/24 19:31:20 Started server on localhost 3000
+INFO: 2025/04/24 19:41:54 Started server on localhost 3000
+INFO: 2025/04/24 19:42:33 Started server on localhost 3000
+INFO: 2025/04/24 19:50:17 Started server on localhost 3000
+INFO: 2025/04/24 19:50:55 Started server on localhost 3000
+ERROR: 2025/04/24 20:02:26 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:02:32 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:02:35 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:02:44 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:14:53 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:15:10 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:15:40 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:16:19 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:16:29 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:17:13 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:18:25 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:18:26 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:18:38 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:27:24 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:27:29 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:30:57 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:30:59 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:32:22 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:32:25 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:32:31 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:32:40 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:36:26 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:36:27 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:36:29 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:36:33 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:36:43 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:37:10 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:37:11 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:37:40 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:38:54 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:43:17 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:44:27 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:44:57 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:45:09 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:45:12 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:45:43 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:46:03 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:46:04 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:46:12 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:46:21 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:46:32 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:47:28 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:47:33 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:47:37 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:47:43 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:47:44 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:47:47 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:47:55 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:48:21 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:48:58 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:20 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:21 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:23 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:37 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:52 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:55 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:56 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:49:58 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:50:00 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:50:01 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:50:08 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:50:14 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 20:50:52 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/24 21:05:13 Started server on localhost 3000
+INFO: 2025/04/24 21:07:20 Started server on localhost 3000
+INFO: 2025/04/24 21:08:24 Started server on localhost 3000
+ERROR: 2025/04/24 21:19:41 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:19:53 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:19:58 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:20:00 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:20:04 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:20:07 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:20:55 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:00 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:01 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:09 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:10 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:30 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:31 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:35 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:48 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:51 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:52 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:55 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:21:59 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:22:00 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:22:13 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:22:16 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:22:17 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:22:21 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:22:29 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:22:37 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/24 21:28:15 Started server on localhost 3000
+INFO: 2025/04/24 21:32:08 Started server on localhost 3000
+ERROR: 2025/04/24 21:42:13 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:42:31 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:42:32 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:42:44 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:42:48 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:43:39 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:43:54 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:43:56 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:44:52 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:44:53 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:45:05 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:45:06 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:45:08 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:45:11 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:45:12 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:45:15 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:46:47 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 21:46:52 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/24 21:47:53 Started server on localhost 3000
+ERROR: 2025/04/24 21:58:01 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 22:00:16 json: cannot unmarshal string into Go struct field Start_royale_bets_json.last_refresh_time of type int
+ERROR: 2025/04/24 22:01:16 json: cannot unmarshal string into Go struct field Start_royale_bets_json.last_refresh_time of type int
+ERROR: 2025/04/24 22:02:16 json: cannot unmarshal string into Go struct field Start_royale_bets_json.last_refresh_time of type int
+ERROR: 2025/04/24 22:02:30 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/24 22:02:35 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/25 08:15:25 Started server on localhost 3000
+INFO: 2025/04/25 08:36:17 Started server on localhost 3000
+INFO: 2025/04/25 08:46:06 Started server on localhost 3000
+INFO: 2025/04/25 09:03:50 Started server on localhost 3000
+INFO: 2025/04/25 09:17:47 Started server on localhost 3000
+INFO: 2025/04/25 09:20:58 Started server on localhost 3000
+INFO: 2025/04/25 09:32:58 Started server on localhost 3000
+INFO: 2025/04/25 09:47:17 Started server on localhost 3000
+ERROR: 2025/04/25 10:04:16 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:07:35 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:07:43 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:09:06 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:09:09 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:09:11 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:09:12 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:09:22 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:10:25 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:10:29 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:10:31 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:10:33 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:23:03 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:23:15 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/25 10:28:44 Started server on localhost 3000
+ERROR: 2025/04/25 10:33:56 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:34:03 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:34:15 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:34:19 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:34:31 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:43:52 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 10:43:54 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/25 11:04:10 Started server on localhost 3000
+ERROR: 2025/04/25 11:06:17 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 11:06:18 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 11:06:21 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 11:06:33 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 11:06:36 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+ERROR: 2025/04/25 11:06:41 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
+INFO: 2025/04/25 11:21:34 Started server on localhost 3000
+ERROR: 2025/04/25 11:22:41 FILE: royale_bets_app FUNC: Register_Viewer CALL: sqlite.Insert_Royale_bets_viewer sqlite3: constraint failed: UNIQUE constraint failed: RoyaleBetsViewer.Session_id
