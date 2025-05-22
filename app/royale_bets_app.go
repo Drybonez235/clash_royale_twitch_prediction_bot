@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"time"
-	"fmt"
 
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/clash_royale_api"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/logger"
@@ -53,46 +52,63 @@ func Register_viewer(viewer sqlite.Royale_bets_viewer, db *sqlite3.Conn) (*sqlit
 
 //This is the subsiquent call the website makes to update. It gets streamer info, checks to see if there is an update availible. If there is an update it updates. 
 func Update_viewer(viewer sqlite.Royale_bets_viewer, Env_struct logger.Env_variables, db *sqlite3.Conn)(*sqlite.Royale_bets_streamer, *[]sqlite.Battle_result, error){
+
 	
-	err := sqlite.Update_royale_bets_viewer(db, viewer.Session_id, viewer.Screen_name, viewer.Total_points, viewer.Last_refresh_time)
-
-	if err!=nil{
-		return nil, nil, errors.New("FILE: royale_bets_app FUNC: sqlite.Update_royale_bets_viewer " + err.Error())
-	}
-
+	//This is a bug because we get streamer info, but if there is a new battle we have to add one.
 	streamer_info, err := sqlite.Get_royale_bets_streamer(db, viewer.Streamer_player_tag, viewer.Session_id)
 	if err!=nil{
 		return nil, nil, errors.New("FILE: royale_bets_app FUNC: Update_viewer CALL: sqlite.Get_royale_bets_streamer " + err.Error())
 	}
 
-	//If the streamer was updated before the viewer last updated, then there could be a new battle.
+	var new_battles []sqlite.Battle_result
+	viewer_last_refresh_to_update := viewer.Last_refresh_time // Initialize with current viewer time
+
+	// If the streamer was updated before the viewer last updated, fetch from API and update DB.
 	if streamer_info.Streamer_last_refresh_time <= viewer.Last_refresh_time{
-		//This calls the clash royale api.
 		if err := Update_streamer_battles(streamer_info.Streamer_player_tag, viewer.Session_id ,Env_struct, db); err!=nil{
-			return streamer_info, nil, err
+			return streamer_info, nil, err // Consider returning nil, nil, err for consistency
+		}
+		// After updating streamer battles, fetch the new battles that were just added.
+		new_battles, err = sqlite.Get_battle_result(db, streamer_info.Streamer_player_tag, viewer.Last_refresh_time)
+		if err!=nil{
+			return nil, nil, errors.New("FILE: royale_bets_app FUNC: Update_viewer CALL: sqlite.Get_battle_result after Update_streamer_battles " + err.Error())
 		}
 
-	//If the streamer was updated after the viewer, then there could be a battle in the database already.
-	} else if streamer_info.Streamer_last_refresh_time > viewer.Last_refresh_time{
-		//This calls our database
-		new_battles, err := sqlite.Get_battle_result(db, streamer_info.Streamer_player_tag, viewer.Last_refresh_time)
+		streamer_info, err = sqlite.Get_royale_bets_streamer(db, viewer.Streamer_player_tag, viewer.Session_id)
 		if err!=nil{
-			return nil, nil, err
-		} 
-		return streamer_info, &new_battles, nil
+			return nil, nil, errors.New("FILE: royale_bets_app FUNC: Update_viewer CALL: sqlite.Get_royale_bets_streamer " + err.Error())
+		}
+
+	// If the streamer was updated after the viewer, fetch battles directly from the database.
+	} else { // Use a simple else since the conditions are mutually exclusive
+		new_battles, err = sqlite.Get_battle_result(db, streamer_info.Streamer_player_tag, viewer.Last_refresh_time)
+		if err!=nil{
+			return nil, nil, errors.New("FILE: royale_bets_app FUNC: Update_viewer CALL: sqlite.Get_battle_result in else block " + err.Error())
+		}
 	}
 
-	new_battles, err := sqlite.Get_battle_result(db, streamer_info.Streamer_player_tag, viewer.Last_refresh_time)
-		if err!=nil{
-			return nil, nil, err
-		} 
-		// if len(new_battles) == 0{
-		// 	//empty_array := []sqlite.Battle_result{}
-		// 	//Maybe. Maybe not. I have to decide what to rteturn. Proably in the server layer.
-		// 	return streamer_info, &new_battles, nil //errors.New("FILE: royale_bets_app FUNC: Update_viewer CALL: sqlite.Get_battle_result MESSAGE: No new_battles")
-		// }
-	return streamer_info, &new_battles, nil	
+	// Find the timestamp of the latest battle retrieved
+	latest_battle_time := viewer.Last_refresh_time // Start with the viewer's last refresh time
+	if len(new_battles) > 0 {
+		// Assuming battles are returned in ascending order of time by Get_battle_result
+		// If not, you'll need to sort or iterate to find the max timestamp
+		latest_battle_time = new_battles[len(new_battles)-1].Battle_time
+	}
+
+	// Update the viewer's last refresh time to the timestamp of the latest battle they received.
+	// This ensures on the next call, Get_battle_result fetches battles after this point.
+	viewer_last_refresh_to_update = latest_battle_time
+
+	err = sqlite.Update_royale_bets_viewer(db, viewer.Session_id, viewer.Screen_name, viewer.Total_points, viewer_last_refresh_to_update)
+
+	if err!=nil{
+		return nil, nil, errors.New("FILE: royale_bets_app FUNC: sqlite.Update_royale_bets_viewer " + err.Error())
+	}
+
+	return streamer_info, &new_battles, nil
 }
+
+
 
 //This calls the clash royale api and adds them to the db if the battle time is less  
 func Update_streamer_battles(streamer_tag string, viewer_session_id int, Env_struct logger.Env_variables, db *sqlite3.Conn) error {
@@ -120,15 +136,12 @@ func Update_streamer_battles(streamer_tag string, viewer_session_id int, Env_str
 	for i:=0; i<len(matches.Matches); i++{
 		battle := matches.Matches[i]
 		battle_time, err := clash_royale_api.String_time_to_time_time(battle.BattleTime)
-
-		fmt.Println("Battle Time ", int(battle_time.Unix() * 1000), " Streamer Last refresh time ", streamer.Streamer_last_refresh_time)
-
 		if err != nil{
 			return errors.New("FILE: royale_bets_app FUNC: Update_streamer_battles CALL: clash_royale_api.String_time_to_time_time " + err.Error())
 		}
 
 		if streamer.Streamer_last_refresh_time > (int(battle_time.Unix()) * 1000){
-			break
+			return nil	
 		} else {
 			var result sqlite.Battle_result
 
@@ -143,12 +156,10 @@ func Update_streamer_battles(streamer_tag string, viewer_session_id int, Env_str
 
 			//This is untested but it should increase the win or loss value of the streamer by 1 depedning on the battle result.
 			if result.Red_crowns_taken > result.Blue_crowns_lost{
-				fmt.Println("More red crowns than Blue crowns")
 				if err = sqlite.Update_royale_bets_streamer_wins_losses(db, streamer.Streamer_player_tag, streamer.Stream_start_time, int(time.Now().Unix() * 1000), "win"); err!=nil{
 					return err
 				}
 			} else if result.Blue_crowns_lost > result.Red_crowns_taken{
-				fmt.Println("More Blue crowns than red crowns")
 				if err = sqlite.Update_royale_bets_streamer_wins_losses(db, streamer.Streamer_player_tag, streamer.Stream_start_time, int(time.Now().Unix() * 1000), "lose"); err!=nil{
 					return err
 				}	

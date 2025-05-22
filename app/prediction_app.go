@@ -27,7 +27,6 @@ func Start_prediction_app(sub string, Env_struct logger.Env_variables, db *sqlit
 
 
 	for stream {
-		fmt.Println("We did start the stream loop")
 		//We have to check to see if there is an active prediction here that was set by me. IF it was not set by me, then we need to wait.
 		prediction_id, _, err := sqlite.Get_predictions(db, user.User_id, "ACTIVE")
 

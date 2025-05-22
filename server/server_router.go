@@ -19,7 +19,7 @@ type verify_player_tag_req struct{
 }
 
 func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables, db *sqlite3.Conn) {
-	logger.Info("Started server on localhost 3000")
+	logger.Info("Started server on localhost 5318")
 
 	redirect_uri := func(w http.ResponseWriter, req *http.Request) {
 		logger.Info("Recived an app request")
@@ -86,10 +86,11 @@ func Start_server(logger *logger.StandardLogger, Env_struct logger.Env_variables
 	http.HandleFunc("/redirect", redirect_uri)
 	http.HandleFunc("/subscription_handler", subscription_callback)
 	http.HandleFunc("/receive_twitch_event", handle_event)
+	
 	http.HandleFunc("/verify_player_tag", verify_player_tag)
 	http.HandleFunc("/start_royale_bets", start_royale_bets)
 	http.HandleFunc("/update_royale_bets", update_royale_bets)
 	
-	http.ListenAndServe("localhost:3000", nil)
+	http.ListenAndServe("localhost:5318", nil)
 }
  

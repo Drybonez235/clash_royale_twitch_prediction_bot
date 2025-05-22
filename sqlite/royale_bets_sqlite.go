@@ -1,7 +1,6 @@
 package sqlite
 
 import(
-	"fmt"
 	"errors"
 	"github.com/ncruces/go-sqlite3"
 	_ "github.com/ncruces/go-sqlite3/driver"
@@ -121,7 +120,6 @@ func Insert_royale_bets_streamer(db *sqlite3.Conn, streamer Royale_bets_streamer
 }
 
 func Insert_battle_result(db *sqlite3.Conn, result Battle_result) error {
-	fmt.Println("Battle result added to db: ", result)
 	stmt, _, err := db.Prepare("INSERT INTO BattleResult (Player_tag, Battle_time, Red_crowns_taken, Blue_crowns_lost) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		return errors.New("Error preparing statement for BattleResult: " + err.Error())
@@ -223,46 +221,48 @@ func Update_royale_bets_viewer(db *sqlite3.Conn, session_id int, screen_name str
 	if err := stmt.BindText(4, screen_name); err != nil {
 		return err
 	}
-	fmt.Println("Updated viewer: Total Points: ", total_points, " Last Refresh Time:", last_refresh_time )
 	return stmt.Exec()
 }
 
 func Update_royale_bets_streamer_wins_losses(db *sqlite3.Conn, player_tag string, stream_start_time int , last_refresh_time int, win_lose string)(error){
-	fmt.Println("Update Streamer: Last Refresh Time ", last_refresh_time)
-	
 	var column string
 	switch win_lose {
-	case "win": 
+	case "win":
 		column = " Wins = Wins + 1"
 	case "lose":
 		column = "Losses = Losses + 1"
-	} 
+	}
 
 	query := "UPDATE RoyaleBetsStreamer SET " + column + ", Streamer_last_refresh_time = ? WHERE Streamer_player_tag = ? AND Stream_start_time = ?"
-	
+
 	stmt, _, err := db.Prepare(query)
 	if err!=nil{
 		return errors.New("FILE: Royale_bets_sqlite FUNC: Update_royale_bets_streamer_wins_losses CALL: db.prepare " + err.Error())
 	}
 	defer stmt.Close()
 
+	// Note: The binding order is important and should match the '?' order in the query.
+	// The query is "..., Streamer_last_refresh_time = ?, WHERE ..., Streamer_player_tag = ?, AND Stream_start_time = ?"
+	// So the binding should be: last_refresh_time, player_tag, stream_start_time
+	if err:= stmt.BindInt(1, last_refresh_time); err!= nil{
+		return errors.New("FILE: Royale_bets_sqlite FUNC: Update_royale_bets_streamer_wins_losses CALL: stmt.BindInt(1, last_refresh_time) " + err.Error())
+	}
+
 	if err := stmt.BindText(2, player_tag); err!= nil{
-		return err
+		return errors.New("FILE: Royale_bets_sqlite FUNC: Update_royale_bets_streamer_wins_losses CALL: stmt.BindText(2, player_tag) " + err.Error())
 	}
 
 	if err := stmt.BindInt(3, stream_start_time); err!= nil{
-		return err
+		return errors.New("FILE: Royale_bets_sqlite FUNC: Update_royale_bets_streamer_wins_losses CALL: stmt.BindInt(3, stream_start_time) " + err.Error())
 	}
 
-	if err:= stmt.BindInt(1, last_refresh_time); err!= nil{
-		return err
-	}
-//I WASNT ACTULLY CARRING OUT THE SQL
+	// This is the crucial line that was commented out!
 	return stmt.Exec()
 }
 
+
 func Get_battle_result(db *sqlite3.Conn, player_tag string, last_refresh_time int) ([]Battle_result, error) {
-	stmt, _, err := db.Prepare("SELECT Player_tag, Battle_time, Red_crowns_taken, Blue_crowns_lost FROM BattleResult WHERE Player_tag = ? AND Battle_time >= ?")
+	stmt, _, err := db.Prepare("SELECT Player_tag, Battle_time, Red_crowns_taken, Blue_crowns_lost FROM BattleResult WHERE Player_tag = ? AND Battle_time >= ? ORDER BY Battle_time ASC")
 	if err != nil {
 		return nil, errors.New("Error preparing statement for get_battle_result: " + err.Error())
 	}
@@ -308,7 +308,7 @@ func Get_all_battle_results(db *sqlite3.Conn) ([]Battle_result, error) {
 }
 
 func Get_top_ten_and_viewer_position(db *sqlite3.Conn, player_tag string, stream_start_time int,viewer_session_id int) (*[]Leader_board_entry, error) {
-	stmt, _, err := db.Prepare("SELECT Screen_name, Total_points, Session_id FROM RoyaleBetsViewer WHERE Streamer_player_tag = ? AND Session_id >= ? ORDER BY Total_points")
+	stmt, _, err := db.Prepare("SELECT Screen_name, Total_points, Session_id FROM RoyaleBetsViewer WHERE Streamer_player_tag = ? AND Session_id >= ? ORDER BY Total_points DESC")
 	if err != nil {
 		return nil, errors.New("Error preparing statement for get_battle_result: " + err.Error())
 	}

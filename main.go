@@ -33,7 +33,7 @@ func main() {
 
 	//test_clash_db(db)
 
-	Env_struct, err := logger.Get_env_variables("/Users/jonathanlewis/Documents/Projects/clash_royale_twitch_prediction_bot/test.env")
+	Env_struct, err := logger.Get_env_variables("./.env")
 	if err != nil {
 		panic(err)
 	}

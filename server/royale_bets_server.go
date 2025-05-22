@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"fmt"
 
 	//app "github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
 	"github.com/Drybonez235/clash_royale_twitch_prediction_bot/app"
@@ -28,22 +27,22 @@ type Royale_bets_response struct{
 	Battle_results []sqlite.Battle_result `json:"battle_results"`
 }
 
-//I need to make a custom type....
-//This gets called first.
 func Start_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct logger.Env_variables, db *sqlite3.Conn)(error){	
-	
+
 	if req.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Max-Age", "3600")
 		w.WriteHeader(http.StatusNoContent)
 		return nil
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	
+
 	
 	var viewer_json Start_royale_bets_json
 
@@ -104,7 +103,7 @@ func Update_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct log
 	
 	if req.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Max-Age", "3600")
@@ -159,7 +158,6 @@ func Update_royale_bets(w http.ResponseWriter, req *http.Request, Env_struct log
 	response.Streamer_info = *streamer_info
 	response.Battle_results = *battle_results
 	response.Leaderboard = *top_ten
-	fmt.Println(response, "This is the response for update royale bets.")
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(response)
 	if err!=nil{
