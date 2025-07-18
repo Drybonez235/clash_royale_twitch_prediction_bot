@@ -91,7 +91,7 @@ func Request_user_oath_token(code string, player_tag string, Env_struct logger.E
 	url_quary.Set("client_secret", Env_struct.APP_SECRET)
 	url_quary.Set("grant_type", "authorization_code")
 	url_quary.Set("code", code)
-	url_quary.Set("redirect_uri", Env_struct.ROYALE_BETS_URL+"/redirect")
+	url_quary.Set("redirect_uri", "https://" +Env_struct.ROYALE_BETS_URL+"/redirect")
 	url_encoded_string := url_quary.Encode()
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", Env_struct.OAUTH_REFRESH_TOKEN_URI +"?", strings.NewReader(url_encoded_string))
