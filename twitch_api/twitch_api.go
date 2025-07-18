@@ -172,14 +172,14 @@ func Get_claims(oauth_token string, new_user access_token_response_json, player_
 	if err!=nil{
 		return err
 	}
-	fmt.Println(claims_json.Sub)
+	//fmt.Println(claims_json.Sub)
 	
 	//So EVENTsub sends a request to twitch to sub to a streamer. When you request this, twitch sends back a response BUT it is required that the response has to be sent to a website using HTTPS and on port 443. More info here: https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
-	// err = Create_EventSub(claims_json.Sub, "stream.online", Env_struct)
-	// if err!=nil{return err}
+	err = Create_EventSub(claims_json.Sub, "stream.online", Env_struct)
+	if err!=nil{return err}
 
-	// err = Create_EventSub(claims_json.Sub, "stream.offline", Env_struct)
-	// if err!=nil{return err}
+	err = Create_EventSub(claims_json.Sub, "stream.offline", Env_struct)
+	if err!=nil{return err}
 
 	return nil
 }
