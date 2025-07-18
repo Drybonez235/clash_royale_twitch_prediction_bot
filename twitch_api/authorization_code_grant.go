@@ -58,7 +58,7 @@ func Generate_authorize_app_url(scope_request string, Env_struct logger.Env_vari
 	url_quary.Set("nonce", nonce)
 	encoded_url_quary := url_quary.Encode()
 	//Env_struct.OAUTH_AUTHORIZE_URI = https://id.twitch.tv/oauth2/authorize
-	uri_url_quary := "?redirect_uri=" + Env_struct.ROYALE_BETS_URL + "/redirect" + "&"
+	uri_url_quary := "?redirect_uri=https://" + Env_struct.ROYALE_BETS_URL + "/redirect" + "&"
 	return_url := Env_struct.OAUTH_AUTHORIZE_URI + uri_url_quary + encoded_url_quary
 	return return_url, state, nil
 }
