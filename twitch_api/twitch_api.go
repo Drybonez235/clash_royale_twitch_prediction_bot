@@ -317,16 +317,11 @@ func Refresh_token(refresh_token string, user_id string, Env_struct logger.Env_v
 //Sends a POST request using JSON in the body to https://api.twitch.tv/helix/eventsub/subscriptions. 
 //Information about the twitch API can be found at: https://dev.twitch.tv/docs/eventsub/manage-subscriptions/#subscribing-to-events and https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription.
 func Create_EventSub(sub_id string, sub_type string, Env_struct logger.Env_variables)(error){
-	fmt.Println("Create event sub fired")
 	client := http.Client{}
 	app_token, err := Request_app_oath_token(Env_struct)
 	if err!=nil{return err}
-	fmt.Println("Fired before bearer string")
 	bearer_string := "Bearer " + app_token //Changed from using the app secret to using an App OAuth token.
-	fmt.Println("Fired after bearer string")
 	req_body, err := create_sub_request_body(sub_id, sub_type, Env_struct)
-	fmt.Println("Fired after making the request body")
-	fmt.Println(string(req_body))
 	if err!=nil{
 		return err
 	}
@@ -340,7 +335,6 @@ func Create_EventSub(sub_id string, sub_type string, Env_struct logger.Env_varia
 	req.Header.Set("Authorization", bearer_string)
 	req.Header.Set("Client-Id", Env_struct.APP_ID)
 	req.Header.Set("Content-Type", "application/json")
-	fmt.Println("Fired before making the client do")
 	resp, err := client.Do(req)
 
 	if err!=nil {
@@ -349,11 +343,11 @@ func Create_EventSub(sub_id string, sub_type string, Env_struct logger.Env_varia
 	}
 
 	if resp == nil {
-		return errors.New("FILE: EventSub FUNC: Create_EventSub CALL: client.Do returned nil response")
+		return errors.New("FILE: twitch_api FUNC: Create_EventSub CALL: client.Do returned nil response")
 	}
 
 	if resp.StatusCode != http.StatusOK{
-		err = errors.New("FILE: EventSub FUNC: Create_EventSub CALL: client.DO " + resp.Status)
+		err = errors.New("FILE: twitch_api FUNC: Create_EventSub CALL: client.Do " + resp.Status)
 		return err
 	}
 	defer resp.Body.Close()
@@ -364,7 +358,7 @@ func Create_EventSub(sub_id string, sub_type string, Env_struct logger.Env_varia
 //Creates the body used in the POST request for subscribing to events.
 //Information about the twitch API can be found at: https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
 func create_sub_request_body(user_id string, sub_type string, Env_struct logger.Env_variables)([]byte, error){
-	callback_string :=  Env_struct.ROYALE_BETS_URL+"/subscription_handler"
+	callback_string :=  "https://"+ Env_struct.ROYALE_BETS_URL+"/subscription_handler"
 	
 	body := EventSubRequest{
 		Type: sub_type,
