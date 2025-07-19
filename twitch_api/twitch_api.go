@@ -71,7 +71,8 @@ type EventSubRequest struct {
 }
 
 type ConditionSubRequest struct {
-	UserID string `json:"user_id"`
+	UserID          string `json:"user_id,omitempty"`           // Used for user.update, and sometimes for 'user_id' in other event types (e.g. channel.follow for the follower's ID)
+    BroadcasterUserID string `json:"broadcaster_user_id,omitempty"`
 }
 
 type TransportSubRequest struct {
@@ -316,12 +317,12 @@ func Refresh_token(refresh_token string, user_id string, Env_struct logger.Env_v
 //Subscribes to events from twitch streamers.
 //Sends a POST request using JSON in the body to https://api.twitch.tv/helix/eventsub/subscriptions. 
 //Information about the twitch API can be found at: https://dev.twitch.tv/docs/eventsub/manage-subscriptions/#subscribing-to-events and https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription.
-func Create_EventSub(sub_id string, sub_type string, Env_struct logger.Env_variables)(error){
+func Create_EventSub(broadcaster_id string, sub_type string, Env_struct logger.Env_variables)(error){
 	client := http.Client{}
 	app_token, err := Request_app_oath_token(Env_struct)
 	if err!=nil{return err}
 	bearer_string := "Bearer " + app_token //Changed from using the app secret to using an App OAuth token.
-	req_body, err := create_sub_request_body(sub_id, sub_type, Env_struct)
+	req_body, err := create_sub_request_body(broadcaster_id, sub_type, Env_struct)
 	if err!=nil{
 		return err
 	}
@@ -357,14 +358,14 @@ func Create_EventSub(sub_id string, sub_type string, Env_struct logger.Env_varia
 
 //Creates the body used in the POST request for subscribing to events.
 //Information about the twitch API can be found at: https://dev.twitch.tv/docs/api/reference/#create-eventsub-subscription
-func create_sub_request_body(user_id string, sub_type string, Env_struct logger.Env_variables)([]byte, error){
+func create_sub_request_body(broadcaster_id string, sub_type string, Env_struct logger.Env_variables)([]byte, error){
 	callback_string :=  "https://"+ Env_struct.ROYALE_BETS_URL+"/subscription_handler"
 	
 	body := EventSubRequest{
 		Type: sub_type,
 		Version: "1",
 		Condition: ConditionSubRequest{
-			UserID: user_id,
+			BroadcasterUserID: broadcaster_id,
 		},
 		Transport : TransportSubRequest{
 			Method: "webhook",
