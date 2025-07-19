@@ -139,7 +139,7 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	client := &http.Client{}
 	url_quary := url.Values{}
 	url_quary.Set("broadcaster_id", sub)
-	url_quary.Set("first", "1")
+	//url_quary.Set("first", "1")
 	//If there is an active prediction in my DB, we will search for it here. If not, we don't set the id.
 	if prediction_id != ""{
 		url_quary.Set("id", prediction_id)
@@ -187,10 +187,8 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	}
 
 	  if len(prediction_body.Data) == 0 {
-        // This means no predictions were found matching your criteria.
-        // Twitch's API returns an empty 'data' array if no matches, not an error.
-        // This is important if `prediction_id` might not always match an active one.
-        return "no_active_prediction", nil // Or an appropriate status
+		err = fmt.Errorf("WARN: Twitch reported no prediction (%s) for (%s)", prediction_body.Data[0].Id, sub)
+        return "no_active_prediction", err 
     }
 
 	if prediction_body.Data[0].Status == "ACTIVE" || prediction_body.Data[0].Status == "LOCKED"{
