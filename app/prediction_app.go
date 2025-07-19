@@ -13,7 +13,6 @@ import (
 )
 
 func Start_prediction_app(sub string, Env_struct logger.Env_variables, db *sqlite3.Conn) error {
-	fmt.Println("Started Prediction App")
 	user, err := sqlite.Get_twitch_user(db ,"sub", sub)
 	if err!=nil{
 		return err
@@ -41,20 +40,17 @@ func Start_prediction_app(sub string, Env_struct logger.Env_variables, db *sqlit
 		}
 
 		 if own_active_prediction == "our_prediction" {
-			fmt.Println("Our prediction")
 			err = Watch_prediction(sub, user, Env_struct, db)
 			if err!=nil{
 				return err
 			}
 
 		 }else if own_active_prediction == "no_active_prediction"{
-			fmt.Println("No active prediction")
 			err = twitch.Start_prediction(user, Env_struct, db)
 			if err!=nil{
 				return err
 			}
 		} else if own_active_prediction == "not_our_prediction" {
-			fmt.Println("Not our prediction")
 			time.Sleep(30 * time.Second)
 		} else {
 			err = errors.New("FILE: prediction_app FUNC: Start_prediction_app BUG: own_active_prediction invalid")
@@ -88,7 +84,6 @@ func Watch_prediction(sub string, user sqlite.Twitch_user, Env_struct logger.Env
 	}
 	new_battle := "no_new_battles"
 	for (new_battle == "no_new_battles"){
-		fmt.Println("No new battles")
 		user, err := sqlite.Get_twitch_user(db, "sub", sub)
 		if err!=nil{return err}
 		if user.Online != 1{

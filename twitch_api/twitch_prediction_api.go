@@ -139,7 +139,7 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 	client := &http.Client{}
 	url_quary := url.Values{}
 	url_quary.Set("broadcaster_id", sub)
-	url_quary.Set("first", "0")
+	url_quary.Set("first", "1")
 	//If there is an active prediction in my DB, we will search for it here. If not, we don't set the id.
 	if prediction_id != ""{
 		url_quary.Set("id", prediction_id)
