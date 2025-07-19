@@ -341,16 +341,16 @@ func Create_EventSub(sub_id string, sub_type string, Env_struct logger.Env_varia
 		err = errors.New("FILE: twitch_api FUNC: Create_EventSub CALL: client.Do " + err.Error())	
 		return err
 	}
-
-	if resp == nil {
-		return errors.New("FILE: twitch_api FUNC: Create_EventSub CALL: client.Do returned nil response")
-	}
-
-	if resp.StatusCode != http.StatusOK{
-		err = errors.New("FILE: twitch_api FUNC: Create_EventSub CALL: client.Do " + resp.Status)
-		return err
-	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted{
+
+		bodyBytes, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("FILE: twitch_api FUNC: Create_EventSub CALL: client.Do: unexpected status code %d (%s), and failed to read response body: %w", resp.StatusCode, resp.Status, readErr)
+		}
+		return fmt.Errorf("FILE: twitch_api FUNC: Create_EventSub CALL: client.Do: unexpected status code %d (%s), response body: %s", resp.StatusCode, resp.Status, string(bodyBytes))
+	}
 
 	return nil
 }
