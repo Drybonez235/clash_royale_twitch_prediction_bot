@@ -136,14 +136,12 @@ func prediction_body(sub string, display_name string) ([]byte, error){
 
 //THis is a new untested function... Need to make sure it works. It is called to see if we need to make a new prediction OR wait.
 func Check_prediction(sub string, bearer string, prediction_id string, Env_struct logger.Env_variables, db *sqlite3.Conn)(string, error){
-	fmt.Println("Check predictions fired")
 	client := &http.Client{}
 	url_quary := url.Values{}
 	url_quary.Set("broadcaster_id", sub)
 	url_quary.Set("first", "0")
 	//If there is an active prediction in my DB, we will search for it here. If not, we don't set the id.
 	if prediction_id != ""{
-		fmt.Println("Prediction id was not blank and that means we search for a specific one.")
 		url_quary.Set("id", prediction_id)
 	}
 	url_encoded_string := url_quary.Encode()
@@ -166,8 +164,11 @@ func Check_prediction(sub string, bearer string, prediction_id string, Env_struc
 		return "", err
 	}
 	if resp.StatusCode != http.StatusOK{
-		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do " + resp.Status)
-		return "", err
+		bodyBytes, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return "",fmt.Errorf("FILE: twitch_prediction FUNC: Check_prediction CALL: client.Do: unexpected status code %d (%s), and failed to read response body: %w", resp.StatusCode, resp.Status, readErr)
+		}
+		return "",fmt.Errorf("FILE: twitch_prediction FUNC: Check_prediction CALL: client.Do: unexpected status code %d (%s), response body: %s", resp.StatusCode, resp.Status, string(bodyBytes))
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err!=nil{
@@ -238,8 +239,11 @@ func End_prediction(prediction_id string, outcome_id string, broadcaster_id stri
 	}
 
 	if resp.StatusCode != http.StatusOK{
-		err := errors.New("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do " + resp.Status)
-		return err
+		bodyBytes, readErr := io.ReadAll(resp.Body)
+		if readErr != nil {
+			return fmt.Errorf("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do: unexpected status code %d (%s), and failed to read response body: %w", resp.StatusCode, resp.Status, readErr)
+		}
+		return fmt.Errorf("FILE: twitch_prediction FUNC: End_prediction CALL: client.Do: unexpected status code %d (%s), response body: %s", resp.StatusCode, resp.Status, string(bodyBytes))
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err!=nil{
